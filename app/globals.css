@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --blueprint-bg: #0b1e2e;
+  --blueprint-bg-2: #0f2740;
+  --blueprint-line: #24455f;
+  --blueprint-accent: #5fb4dd;
+  --blueprint-accent-strong: #8fd0ef;
+  --blueprint-amber: #e0a458;
+  --blueprint-text: #dce8f0;
+  --blueprint-text-dim: #7d97a8;
+}
+
+html {
+  background: var(--blueprint-bg);
+}
+
+body {
+  background-color: var(--blueprint-bg);
+  background-image:
+    linear-gradient(var(--blueprint-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--blueprint-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
+  color: var(--blueprint-text);
+  font-family: var(--font-body);
+}
+
+.font-mono-cad {
+  font-family: var(--font-mono);
+}
+
+.dim-line {
+  position: relative;
+}
+.dim-line::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--blueprint-line);
+  z-index: 0;
+}
+.dim-tick {
+  background: var(--blueprint-bg);
+  position: relative;
+  z-index: 1;
+}
