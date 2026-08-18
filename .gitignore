@@ -1,0 +1,8 @@
+node_modules
+.next
+cadconnect.db
+cadconnect.db-shm
+cadconnect.db-wal
+.env
+.env.local
+*.log
