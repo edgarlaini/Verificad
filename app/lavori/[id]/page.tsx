@@ -20,7 +20,7 @@ export default async function DettaglioLavoro({
   return (
     <main className="max-w-3xl mx-auto px-6 py-16">
       <p className="font-mono-cad text-xs tracking-[0.3em] text-[var(--blueprint-accent)] mb-4">
-        TAV. 02 — DETTAGLIO LAVORO
+        TAV. 04 — DETTAGLIO LAVORO
       </p>
       <div className="flex items-start justify-between gap-4 mb-2">
         <h1 className="text-2xl font-semibold">{lavoro.titolo}</h1>

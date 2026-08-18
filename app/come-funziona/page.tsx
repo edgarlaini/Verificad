@@ -2,7 +2,7 @@ export default function ComeFunziona() {
   return (
     <main className="max-w-3xl mx-auto px-6 py-16">
       <p className="font-mono-cad text-xs tracking-[0.3em] text-[var(--blueprint-accent)] mb-4">
-        TAV. 05 — COME FUNZIONA
+        TAV. 01 — COME FUNZIONA
       </p>
       <h1 className="text-3xl font-semibold mb-3">Come funziona VerifiCAD</h1>
       <p className="text-[var(--blueprint-text-dim)] max-w-xl mb-12">

@@ -16,7 +16,7 @@ export default async function Home() {
     <main className="max-w-5xl mx-auto px-6">
       <section className="py-16 border-b border-[var(--blueprint-line)]">
         <p className="font-mono-cad text-xs tracking-[0.3em] text-[var(--blueprint-accent)] mb-4">
-          TAV. 01 — BACHECA LAVORI
+          TAV. 02 — BACHECA LAVORI
         </p>
         <h1 className="text-3xl sm:text-4xl font-semibold max-w-2xl leading-tight">
           Trova il disegnatore CAD giusto per il tuo progetto.

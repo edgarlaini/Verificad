@@ -7,7 +7,7 @@ export default async function Disegnatori() {
   return (
     <main className="max-w-5xl mx-auto px-6 py-16">
       <p className="font-mono-cad text-xs tracking-[0.3em] text-[var(--blueprint-accent)] mb-4">
-        TAV. 04 — DISEGNATORI VERIFICATI
+        TAV. 03 — DISEGNATORI VERIFICATI
       </p>
       <h1 className="text-2xl font-semibold mb-8">Disegnatori CAD</h1>
 

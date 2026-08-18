@@ -44,7 +44,7 @@ export default function NuovoLavoro() {
   return (
     <main className="max-w-2xl mx-auto px-6 py-16">
       <p className="font-mono-cad text-xs tracking-[0.3em] text-[var(--blueprint-accent)] mb-4">
-        TAV. 03 — PUBBLICA LAVORO
+        TAV. 05 — PUBBLICA LAVORO
       </p>
       <h1 className="text-2xl font-semibold mb-1">Nuovo lavoro</h1>
       <p className="text-[var(--blueprint-text-dim)] text-sm mb-8">
