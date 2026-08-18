@@ -34,6 +34,9 @@ export default function HeaderNav() {
       <a href="/disegnatori" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
         disegnatori
       </a>
+      <a href="/come-funziona" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
+        come funziona
+      </a>
 
       {utente === undefined ? null : utente ? (
         <>
