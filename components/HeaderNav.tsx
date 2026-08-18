@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Utente {
   id: string;
@@ -28,25 +29,25 @@ export default function HeaderNav() {
 
   return (
     <nav className="flex items-center gap-6 text-sm font-mono-cad text-[var(--blueprint-text-dim)]">
-      <a href="/come-funziona" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
+      <Link href="/come-funziona" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
         come funziona
-      </a>
-      <a href="/" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
+      </Link>
+      <Link href="/" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
         bacheca
-      </a>
-      <a href="/disegnatori" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
+      </Link>
+      <Link href="/disegnatori" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
         disegnatori
-      </a>
+      </Link>
 
       {utente === undefined ? null : utente ? (
         <>
           {utente.ruolo === "azienda" && (
-            <a
+            <Link
               href="/lavori/nuovo"
               className="border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors"
             >
               + pubblica lavoro
-            </a>
+            </Link>
           )}
           <span className="text-xs text-[var(--blueprint-text-dim)]">
             {utente.nome} · {utente.ruolo}
@@ -60,15 +61,15 @@ export default function HeaderNav() {
         </>
       ) : (
         <>
-          <a href="/accedi" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
+          <Link href="/accedi" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
             accedi
-          </a>
-          <a
+          </Link>
+          <Link
             href="/registrati"
             className="border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors"
           >
             registrati
-          </a>
+          </Link>
         </>
       )}
     </nav>

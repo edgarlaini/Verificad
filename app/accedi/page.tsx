@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -77,9 +78,9 @@ export default function Accedi() {
 
       <p className="text-sm text-[var(--blueprint-text-dim)] mt-6 text-center">
         Non hai un account?{" "}
-        <a href="/registrati" className="text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]">
+        <Link href="/registrati" className="text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]">
           Registrati
-        </a>
+        </Link>
       </p>
     </main>
   );

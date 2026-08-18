@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -163,9 +164,9 @@ export default function PannelloCandidature({
 
       {!utente && lavoroStato === "aperto" && (
         <p className="text-sm text-[var(--blueprint-text-dim)]">
-          <a href="/accedi" className="text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]">
+          <Link href="/accedi" className="text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]">
             Accedi
-          </a>{" "}
+          </Link>{" "}
           come disegnatore per candidarti a questo lavoro.
         </p>
       )}

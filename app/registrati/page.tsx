@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Ruolo } from "@/lib/auth";
@@ -117,9 +118,9 @@ export default function Registrati() {
 
       <p className="text-sm text-[var(--blueprint-text-dim)] mt-6 text-center">
         Hai già un account?{" "}
-        <a href="/accedi" className="text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]">
+        <Link href="/accedi" className="text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]">
           Accedi
-        </a>
+        </Link>
       </p>
     </main>
   );

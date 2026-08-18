@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { JetBrains_Mono, Inter } from "next/font/google";
 import "./globals.css";
@@ -33,14 +34,14 @@ export default function RootLayout({
         <HeroScene />
         <header className="border-b border-[var(--blueprint-line)]">
           <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="/come-funziona" className="flex items-center gap-2">
+            <Link href="/come-funziona" className="flex items-center gap-2">
               <span className="font-mono-cad text-[var(--blueprint-accent-strong)] text-sm tracking-widest">
                 [+]
               </span>
               <span className="font-mono-cad text-lg tracking-tight">
                 Verifi<span className="text-[var(--blueprint-accent)]">CAD</span>
               </span>
-            </a>
+            </Link>
             <HeaderNav />
           </div>
         </header>
