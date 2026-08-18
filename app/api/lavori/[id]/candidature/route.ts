@@ -12,7 +12,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  return NextResponse.json(getCandidatureLavoro(id));
+  return NextResponse.json(await getCandidatureLavoro(id));
 }
 
 export async function POST(
@@ -29,7 +29,7 @@ export async function POST(
     );
   }
 
-  const lavoro = getLavoro(lavoroId);
+  const lavoro = await getLavoro(lavoroId);
   if (!lavoro || lavoro.stato !== "aperto") {
     return NextResponse.json(
       { error: "Questo lavoro non accetta più candidature." },
@@ -37,7 +37,7 @@ export async function POST(
     );
   }
 
-  if (haGiaCandidato(lavoroId, utente.id)) {
+  if (await haGiaCandidato(lavoroId, utente.id)) {
     return NextResponse.json(
       { error: "Ti sei già candidato per questo lavoro." },
       { status: 400 }
@@ -52,7 +52,7 @@ export async function POST(
     );
   }
 
-  const id = creaCandidatura({
+  const id = await creaCandidatura({
     lavoroId,
     disegnatoreUtenteId: utente.id,
     disegnatoreNome: utente.nome,

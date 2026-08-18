@@ -3,7 +3,7 @@ import { creaLavoro, getLavori } from "@/lib/data";
 import { getUtenteCorrente } from "@/lib/auth";
 
 export async function GET() {
-  return NextResponse.json(getLavori());
+  return NextResponse.json(await getLavori());
 }
 
 export async function POST(req: NextRequest) {
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const id = creaLavoro({
+  const id = await creaLavoro({
     titolo,
     descrizione,
     azienda: utente.nome,

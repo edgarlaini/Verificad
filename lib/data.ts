@@ -1,10 +1,6 @@
-import db from "./db";
+import { supabase } from "./supabase";
 
-export type StatoLavoro =
-  | "aperto"
-  | "in_corso"
-  | "in_revisione"
-  | "chiuso";
+export type StatoLavoro = "aperto" | "in_corso" | "in_revisione" | "chiuso";
 
 export interface Lavoro {
   id: string;
@@ -31,37 +27,6 @@ export interface Disegnatore {
   valutazione: number;
 }
 
-export function getLavori(): Lavoro[] {
-  const righe = db
-    .prepare("SELECT * FROM lavori ORDER BY creatoIl DESC")
-    .all() as Lavoro[];
-  return righe.map(applicaApprovazioneAutomatica);
-}
-
-export function getLavoro(id: string): Lavoro | undefined {
-  const riga = db.prepare("SELECT * FROM lavori WHERE id = ?").get(id) as
-    | Lavoro
-    | undefined;
-  return riga ? applicaApprovazioneAutomatica(riga) : undefined;
-}
-
-export function creaLavoro(input: {
-  titolo: string;
-  descrizione: string;
-  azienda: string;
-  aziendaUtenteId: string;
-  budget: number;
-  scadenza: string;
-  disegnoAllegato: string;
-}) {
-  const id = "l" + Date.now();
-  db.prepare(
-    `INSERT INTO lavori (id, titolo, descrizione, azienda, aziendaUtenteId, budget, scadenza, disegnoAllegato, stato)
-     VALUES (@id, @titolo, @descrizione, @azienda, @aziendaUtenteId, @budget, @scadenza, @disegnoAllegato, 'aperto')`
-  ).run({ id, ...input });
-  return id;
-}
-
 export interface Candidatura {
   id: string;
   lavoroId: string;
@@ -72,122 +37,167 @@ export interface Candidatura {
   creatoIl: string;
 }
 
-export function creaCandidatura(input: {
-  lavoroId: string;
-  disegnatoreUtenteId: string;
-  disegnatoreNome: string;
-  messaggio: string;
-}) {
-  const id = "c" + Date.now();
-  db.prepare(
-    `INSERT INTO candidature (id, lavoroId, disegnatoreUtenteId, disegnatoreNome, messaggio, stato)
-     VALUES (@id, @lavoroId, @disegnatoreUtenteId, @disegnatoreNome, @messaggio, 'in_attesa')`
-  ).run({ id, ...input });
-  return id;
-}
-
-export function getCandidatureLavoro(lavoroId: string): Candidatura[] {
-  return db
-    .prepare("SELECT * FROM candidature WHERE lavoroId = ? ORDER BY creatoIl DESC")
-    .all(lavoroId) as Candidatura[];
-}
-
-export function haGiaCandidato(lavoroId: string, disegnatoreUtenteId: string): boolean {
-  const riga = db
-    .prepare(
-      "SELECT id FROM candidature WHERE lavoroId = ? AND disegnatoreUtenteId = ?"
-    )
-    .get(lavoroId, disegnatoreUtenteId);
-  return !!riga;
-}
-
-export function accettaCandidatura(candidaturaId: string) {
-  const cand = db
-    .prepare("SELECT * FROM candidature WHERE id = ?")
-    .get(candidaturaId) as Candidatura | undefined;
-  if (!cand) throw new Error("Candidatura non trovata");
-
-  db.prepare("UPDATE candidature SET stato = 'accettata' WHERE id = ?").run(
-    candidaturaId
-  );
-  db.prepare(
-    "UPDATE candidature SET stato = 'rifiutata' WHERE lavoroId = ? AND id != ?"
-  ).run(cand.lavoroId, candidaturaId);
-  db.prepare(
-    "UPDATE lavori SET stato = 'in_corso', disegnatoreAssegnato = ?, disegnatoreUtenteId = ? WHERE id = ?"
-  ).run(cand.disegnatoreNome, cand.disegnatoreUtenteId, cand.lavoroId);
-}
-
 const GIORNI_APPROVAZIONE_AUTOMATICA = 14;
 
 function scadenzaSuperata(dataConsegna: string): boolean {
-  const consegnata = new Date(dataConsegna + "Z");
+  const consegnata = new Date(dataConsegna);
   const limite = new Date(
     consegnata.getTime() + GIORNI_APPROVAZIONE_AUTOMATICA * 24 * 60 * 60 * 1000
   );
   return new Date() > limite;
 }
 
-function applicaApprovazioneAutomatica(lavoro: Lavoro): Lavoro {
+async function applicaApprovazioneAutomatica(lavoro: Lavoro): Promise<Lavoro> {
   if (lavoro.stato === "in_revisione" && lavoro.dataConsegna) {
     if (scadenzaSuperata(lavoro.dataConsegna)) {
-      db.prepare("UPDATE lavori SET stato = 'chiuso' WHERE id = ?").run(lavoro.id);
+      await supabase.from("lavori").update({ stato: "chiuso" }).eq("id", lavoro.id);
       return { ...lavoro, stato: "chiuso" };
     }
   }
   return lavoro;
 }
 
-export function consegnaLavoro(input: {
+export async function getLavori(): Promise<Lavoro[]> {
+  const { data, error } = await supabase
+    .from("lavori")
+    .select("*")
+    .order("creatoIl", { ascending: false });
+  if (error || !data) return [];
+  return Promise.all((data as Lavoro[]).map(applicaApprovazioneAutomatica));
+}
+
+export async function getLavoro(id: string): Promise<Lavoro | undefined> {
+  const { data, error } = await supabase.from("lavori").select("*").eq("id", id).single();
+  if (error || !data) return undefined;
+  return applicaApprovazioneAutomatica(data as Lavoro);
+}
+
+export async function creaLavoro(input: {
+  titolo: string;
+  descrizione: string;
+  azienda: string;
+  aziendaUtenteId: string;
+  budget: number;
+  scadenza: string;
+  disegnoAllegato: string;
+}): Promise<string> {
+  const id = "l" + Date.now();
+  await supabase.from("lavori").insert({ id, ...input, stato: "aperto" });
+  return id;
+}
+
+export async function getDisegnatori(): Promise<Disegnatore[]> {
+  const { data, error } = await supabase.from("disegnatori").select("*");
+  if (error || !data) return [];
+  return (data as Array<Disegnatore & { competenze: string }>).map((r) => ({
+    ...r,
+    competenze: r.competenze.split(","),
+  }));
+}
+
+export async function creaCandidatura(input: {
+  lavoroId: string;
+  disegnatoreUtenteId: string;
+  disegnatoreNome: string;
+  messaggio: string;
+}): Promise<string> {
+  const id = "c" + Date.now();
+  await supabase.from("candidature").insert({ id, ...input, stato: "in_attesa" });
+  return id;
+}
+
+export async function getCandidatureLavoro(lavoroId: string): Promise<Candidatura[]> {
+  const { data, error } = await supabase
+    .from("candidature")
+    .select("*")
+    .eq("lavoroId", lavoroId)
+    .order("creatoIl", { ascending: false });
+  if (error || !data) return [];
+  return data as Candidatura[];
+}
+
+export async function haGiaCandidato(
+  lavoroId: string,
+  disegnatoreUtenteId: string
+): Promise<boolean> {
+  const { data } = await supabase
+    .from("candidature")
+    .select("id")
+    .eq("lavoroId", lavoroId)
+    .eq("disegnatoreUtenteId", disegnatoreUtenteId)
+    .maybeSingle();
+  return !!data;
+}
+
+export async function accettaCandidatura(candidaturaId: string): Promise<void> {
+  const { data: cand } = await supabase
+    .from("candidature")
+    .select("*")
+    .eq("id", candidaturaId)
+    .single();
+  if (!cand) throw new Error("Candidatura non trovata");
+
+  await supabase.from("candidature").update({ stato: "accettata" }).eq("id", candidaturaId);
+  await supabase
+    .from("candidature")
+    .update({ stato: "rifiutata" })
+    .eq("lavoroId", cand.lavoroId)
+    .neq("id", candidaturaId);
+  await supabase
+    .from("lavori")
+    .update({
+      stato: "in_corso",
+      disegnatoreAssegnato: cand.disegnatoreNome,
+      disegnatoreUtenteId: cand.disegnatoreUtenteId,
+    })
+    .eq("id", cand.lavoroId);
+}
+
+export async function consegnaLavoro(input: {
   lavoroId: string;
   disegnatoreUtenteId: string;
   consegnaFile: string;
-}) {
-  const lavoro = getLavoro(input.lavoroId);
+}): Promise<void> {
+  const lavoro = await getLavoro(input.lavoroId);
   if (!lavoro) throw new Error("Lavoro non trovato");
   if (lavoro.disegnatoreUtenteId !== input.disegnatoreUtenteId) {
     throw new Error("Non sei il disegnatore assegnato a questo lavoro.");
   }
-  db.prepare(
-    `UPDATE lavori
-     SET stato = 'in_revisione', consegnaFile = ?, dataConsegna = datetime('now'), motivoRevisione = NULL
-     WHERE id = ?`
-  ).run(input.consegnaFile, input.lavoroId);
+  await supabase
+    .from("lavori")
+    .update({
+      stato: "in_revisione",
+      consegnaFile: input.consegnaFile,
+      dataConsegna: new Date().toISOString(),
+      motivoRevisione: null,
+    })
+    .eq("id", input.lavoroId);
 }
 
-export function approvaLavoro(lavoroId: string) {
-  db.prepare("UPDATE lavori SET stato = 'chiuso' WHERE id = ?").run(lavoroId);
+export async function approvaLavoro(lavoroId: string): Promise<void> {
+  await supabase.from("lavori").update({ stato: "chiuso" }).eq("id", lavoroId);
 }
 
-export function richiediRevisione(lavoroId: string, motivo: string) {
-  db.prepare(
-    `UPDATE lavori
-     SET stato = 'in_corso', consegnaFile = NULL, dataConsegna = NULL, motivoRevisione = ?
-     WHERE id = ?`
-  ).run(motivo, lavoroId);
+export async function richiediRevisione(lavoroId: string, motivo: string): Promise<void> {
+  await supabase
+    .from("lavori")
+    .update({
+      stato: "in_corso",
+      consegnaFile: null,
+      dataConsegna: null,
+      motivoRevisione: motivo,
+    })
+    .eq("id", lavoroId);
 }
 
 export function giorniRimanentiRevisione(dataConsegna: string): number {
-  const consegnata = new Date(dataConsegna + "Z");
+  const consegnata = new Date(dataConsegna);
   const limite = new Date(
     consegnata.getTime() + GIORNI_APPROVAZIONE_AUTOMATICA * 24 * 60 * 60 * 1000
   );
   const diff = limite.getTime() - Date.now();
   return Math.max(0, Math.ceil(diff / (24 * 60 * 60 * 1000)));
 }
-
-export function getDisegnatori(): Disegnatore[] {
-  const rows = db.prepare("SELECT * FROM disegnatori").all() as Array<{
-    id: string;
-    nome: string;
-    competenze: string;
-    lavoriCompletati: number;
-    valutazione: number;
-  }>;
-  return rows.map((r) => ({ ...r, competenze: r.competenze.split(",") }));
-}
-
-export { calcolaCommissione } from "./calc";
 
 export const statoLabel: Record<StatoLavoro, string> = {
   aperto: "Aperto",

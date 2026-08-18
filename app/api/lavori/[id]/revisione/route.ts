@@ -8,7 +8,7 @@ export async function POST(
 ) {
   const { id } = await params;
   const utente = await getUtenteCorrente();
-  const lavoro = getLavoro(id);
+  const lavoro = await getLavoro(id);
   if (!utente || !lavoro || lavoro.aziendaUtenteId !== utente.id) {
     return NextResponse.json({ error: "Non autorizzato." }, { status: 403 });
   }
@@ -27,6 +27,6 @@ export async function POST(
     );
   }
 
-  richiediRevisione(id, String(motivo).trim());
+  await richiediRevisione(id, String(motivo).trim());
   return NextResponse.json({ ok: true });
 }

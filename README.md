@@ -9,7 +9,16 @@ npm install --legacy-peer-deps
 npm run dev
 ```
 
+Serve un progetto Supabase: crea `.env.local` con
+
+```
+NEXT_PUBLIC_SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+e incolla il contenuto di `supabase-schema.sql` nel SQL Editor di Supabase per creare le tabelle.
+
 ## Note
 
-- Database: SQLite locale (`cadconnect.db`) — da sostituire con Supabase/Postgres prima del lancio pubblico, perché su hosting serverless (Vercel) il filesystem non persiste tra le richieste.
+- Database: Postgres via Supabase (persistente, funziona su Vercel).
 - Pagamenti: split 10% azienda + 10% disegnatore calcolato ma non ancora collegato a Stripe Connect.

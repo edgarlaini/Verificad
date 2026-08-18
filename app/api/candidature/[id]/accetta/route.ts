@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUtenteCorrente } from "@/lib/auth";
 import { accettaCandidatura, getLavoro } from "@/lib/data";
-import db from "@/lib/db";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(
   req: NextRequest,
@@ -13,14 +13,16 @@ export async function POST(
     return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
   }
 
-  const cand = db
-    .prepare("SELECT * FROM candidature WHERE id = ?")
-    .get(candidaturaId) as { lavoroId: string } | undefined;
+  const { data: cand } = await supabase
+    .from("candidature")
+    .select("lavoroId")
+    .eq("id", candidaturaId)
+    .maybeSingle();
   if (!cand) {
     return NextResponse.json({ error: "Candidatura non trovata." }, { status: 404 });
   }
 
-  const lavoro = getLavoro(cand.lavoroId);
+  const lavoro = await getLavoro(cand.lavoroId);
   if (!lavoro || lavoro.aziendaUtenteId !== utente.id) {
     return NextResponse.json(
       { error: "Non sei il proprietario di questo lavoro." },
@@ -28,6 +30,6 @@ export async function POST(
     );
   }
 
-  accettaCandidatura(candidaturaId);
+  await accettaCandidatura(candidaturaId);
   return NextResponse.json({ ok: true });
 }

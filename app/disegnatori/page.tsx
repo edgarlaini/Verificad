@@ -1,7 +1,9 @@
+export const dynamic = "force-dynamic";
+
 import { getDisegnatori } from "@/lib/data";
 
-export default function Disegnatori() {
-  const disegnatori = getDisegnatori();
+export default async function Disegnatori() {
+  const disegnatori = await getDisegnatori();
   return (
     <main className="max-w-5xl mx-auto px-6 py-16">
       <p className="font-mono-cad text-xs tracking-[0.3em] text-[var(--blueprint-accent)] mb-4">

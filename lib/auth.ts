@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { cookies } from "next/headers";
-import db from "./db";
+import { supabase } from "./supabase";
 
 export type Ruolo = "azienda" | "disegnatore";
 
@@ -20,9 +20,12 @@ export async function registraUtente(input: {
   ruolo: Ruolo;
   nome: string;
 }): Promise<{ ok: true; utente: Utente } | { ok: false; errore: string }> {
-  const esistente = db
-    .prepare("SELECT id FROM utenti WHERE email = ?")
-    .get(input.email.toLowerCase());
+  const emailLower = input.email.toLowerCase();
+  const { data: esistente } = await supabase
+    .from("utenti")
+    .select("id")
+    .eq("email", emailLower)
+    .maybeSingle();
   if (esistente) {
     return { ok: false, errore: "Esiste già un account con questa email." };
   }
@@ -30,25 +33,27 @@ export async function registraUtente(input: {
   const id = "u" + crypto.randomUUID();
   const passwordHash = await bcrypt.hash(input.password, 10);
 
-  db.prepare(
-    `INSERT INTO utenti (id, email, passwordHash, ruolo, nome) VALUES (?, ?, ?, ?, ?)`
-  ).run(id, input.email.toLowerCase(), passwordHash, input.ruolo, input.nome);
+  const { error } = await supabase.from("utenti").insert({
+    id,
+    email: emailLower,
+    passwordHash,
+    ruolo: input.ruolo,
+    nome: input.nome,
+  });
+  if (error) return { ok: false, errore: "Errore nella registrazione." };
 
-  return {
-    ok: true,
-    utente: { id, email: input.email.toLowerCase(), ruolo: input.ruolo, nome: input.nome },
-  };
+  return { ok: true, utente: { id, email: emailLower, ruolo: input.ruolo, nome: input.nome } };
 }
 
 export async function autenticaUtente(
   email: string,
   password: string
 ): Promise<{ ok: true; utente: Utente } | { ok: false; errore: string }> {
-  const riga = db
-    .prepare("SELECT * FROM utenti WHERE email = ?")
-    .get(email.toLowerCase()) as
-    | { id: string; email: string; passwordHash: string; ruolo: Ruolo; nome: string }
-    | undefined;
+  const { data: riga } = await supabase
+    .from("utenti")
+    .select("*")
+    .eq("email", email.toLowerCase())
+    .maybeSingle();
 
   if (!riga) return { ok: false, errore: "Email o password non corretti." };
 
@@ -61,12 +66,9 @@ export async function autenticaUtente(
   };
 }
 
-export function creaSessione(utenteId: string): string {
+export async function creaSessione(utenteId: string): Promise<string> {
   const token = crypto.randomBytes(32).toString("hex");
-  db.prepare("INSERT INTO sessioni (token, utenteId) VALUES (?, ?)").run(
-    token,
-    utenteId
-  );
+  await supabase.from("sessioni").insert({ token, utenteId });
   return token;
 }
 
@@ -84,7 +86,7 @@ export async function rimuoviCookieSessione() {
   const store = await cookies();
   const token = store.get(COOKIE_NAME)?.value;
   if (token) {
-    db.prepare("DELETE FROM sessioni WHERE token = ?").run(token);
+    await supabase.from("sessioni").delete().eq("token", token);
   }
   store.delete(COOKIE_NAME);
 }
@@ -94,13 +96,18 @@ export async function getUtenteCorrente(): Promise<Utente | null> {
   const token = store.get(COOKIE_NAME)?.value;
   if (!token) return null;
 
-  const riga = db
-    .prepare(
-      `SELECT u.id, u.email, u.ruolo, u.nome
-       FROM sessioni s JOIN utenti u ON u.id = s.utenteId
-       WHERE s.token = ?`
-    )
-    .get(token) as Utente | undefined;
+  const { data: sessione } = await supabase
+    .from("sessioni")
+    .select("utenteId")
+    .eq("token", token)
+    .maybeSingle();
+  if (!sessione) return null;
 
-  return riga ?? null;
+  const { data: utente } = await supabase
+    .from("utenti")
+    .select("id, email, ruolo, nome")
+    .eq("id", sessione.utenteId)
+    .maybeSingle();
+
+  return (utente as Utente) ?? null;
 }

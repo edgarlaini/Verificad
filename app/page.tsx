@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { getLavori, statoLabel } from "@/lib/data";
 
@@ -8,8 +10,8 @@ const statoColor: Record<string, string> = {
   chiuso: "text-[var(--blueprint-text-dim)] border-[var(--blueprint-line)]",
 };
 
-export default function Home() {
-  const lavori = getLavori();
+export default async function Home() {
+  const lavori = await getLavori();
   return (
     <main className="max-w-5xl mx-auto px-6">
       <section className="py-16 border-b border-[var(--blueprint-line)]">

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getLavoro, statoLabel, giorniRimanentiRevisione } from "@/lib/data";
 import { calcolaCommissione } from "@/lib/calc";
 import { notFound } from "next/navigation";
@@ -10,7 +12,7 @@ export default async function DettaglioLavoro({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const lavoro = getLavoro(id);
+  const lavoro = await getLavoro(id);
   if (!lavoro) notFound();
 
   const split = calcolaCommissione(lavoro.budget);

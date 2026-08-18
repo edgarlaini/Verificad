@@ -12,7 +12,7 @@ export async function POST(
     return NextResponse.json({ error: "Non autorizzato." }, { status: 401 });
   }
 
-  const lavoro = getLavoro(id);
+  const lavoro = await getLavoro(id);
   if (!lavoro || lavoro.disegnatoreUtenteId !== utente.id) {
     return NextResponse.json(
       { error: "Non sei il disegnatore assegnato a questo lavoro." },
@@ -34,6 +34,6 @@ export async function POST(
     );
   }
 
-  consegnaLavoro({ lavoroId: id, disegnatoreUtenteId: utente.id, consegnaFile });
+  await consegnaLavoro({ lavoroId: id, disegnatoreUtenteId: utente.id, consegnaFile });
   return NextResponse.json({ ok: true });
 }

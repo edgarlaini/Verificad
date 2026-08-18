@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: risultato.errore }, { status: 401 });
   }
 
-  const token = creaSessione(risultato.utente.id);
+  const token = await creaSessione(risultato.utente.id);
   await impostaCookieSessione(token);
 
   return NextResponse.json({ utente: risultato.utente });
