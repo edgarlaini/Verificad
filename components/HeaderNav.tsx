@@ -28,14 +28,14 @@ export default function HeaderNav() {
 
   return (
     <nav className="flex items-center gap-6 text-sm font-mono-cad text-[var(--blueprint-text-dim)]">
+      <a href="/come-funziona" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
+        come funziona
+      </a>
       <a href="/" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
         bacheca
       </a>
       <a href="/disegnatori" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
         disegnatori
-      </a>
-      <a href="/come-funziona" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
-        come funziona
       </a>
 
       {utente === undefined ? null : utente ? (
