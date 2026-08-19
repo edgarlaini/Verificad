@@ -50,7 +50,7 @@ export interface Candidatura {
   creatoIl: string;
 }
 
-const GIORNI_APPROVAZIONE_AUTOMATICA = 14;
+const GIORNI_APPROVAZIONE_AUTOMATICA = 30;
 
 function scadenzaSuperata(dataConsegna: string): boolean {
   const consegnata = new Date(dataConsegna);

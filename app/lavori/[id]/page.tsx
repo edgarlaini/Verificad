@@ -90,7 +90,7 @@ export default async function DettaglioLavoro({
           </div>
         </dl>
         <p className="text-xs text-[var(--blueprint-text-dim)] mt-4">
-          fondi bloccati in escrow fino ad approvazione consegna, o rilascio automatico dopo 14 giorni.
+          fondi bloccati in escrow fino ad approvazione consegna, o rilascio automatico dopo 30 giorni. Includono 3 revisioni gratuite.
         </p>
       </div>
 
@@ -110,7 +110,7 @@ export default async function DettaglioLavoro({
         dataConsegna={lavoro.dataConsegna}
         motivoRevisione={lavoro.motivoRevisione}
         giorniRimanenti={
-          lavoro.dataConsegna ? giorniRimanentiRevisione(lavoro.dataConsegna) : 14
+          lavoro.dataConsegna ? giorniRimanentiRevisione(lavoro.dataConsegna) : 30
         }
       />
     </main>

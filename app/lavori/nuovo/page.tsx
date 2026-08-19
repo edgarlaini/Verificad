@@ -168,6 +168,9 @@ export default function NuovoLavoro() {
             <span>di cui commissione piattaforma (10%)</span>
             <span>€{split.commissioneAzienda.toFixed(2)}</span>
           </div>
+          <p className="text-xs font-mono-cad text-[var(--blueprint-text-dim)] mt-3 pt-3 border-t border-[var(--blueprint-line)]">
+            3 revisioni gratuite incluse nel prezzo.
+          </p>
         </div>
 
         {errore && (

@@ -29,20 +29,19 @@ export default function ComeFunziona() {
             </p>
           </li>
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
-            <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">03 — Verifica prima di pagare</p>
+            <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">03 — Verifica e scarica</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
-              Quando il lavoro è consegnato, lo ispezioni direttamente nel browser con un
-              visualizzatore 3D interattivo — puoi ruotarlo e zoomarlo, ma non scaricarlo finché
-              non approvi. Se qualcosa non torna, richiedi una revisione indicando quale dettaglio
-              non è conforme al disegno.
+              Quando il lavoro è consegnato, il file è già scaricabile: il pagamento è bloccato in
+              escrow dal momento in cui hai scelto il disegnatore, quindi non devi aspettare per
+              controllarlo. Se qualcosa non torna, richiedi una revisione indicando quale dettaglio
+              non è conforme al disegno — sono incluse 3 revisioni gratuite.
             </p>
           </li>
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
-            <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">04 — Approva e sblocca il file</p>
+            <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">04 — Approva e libera il pagamento</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
-              Solo dopo la tua approvazione il file originale diventa scaricabile, e il pagamento
-              viene rilasciato al disegnatore. Se non rispondi entro 14 giorni, l&apos;approvazione
-              scatta automaticamente.
+              La tua approvazione rilascia il pagamento al disegnatore. Se non rispondi entro 30
+              giorni, l&apos;approvazione scatta automaticamente.
             </p>
           </li>
         </ol>
@@ -63,14 +62,14 @@ export default function ComeFunziona() {
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
             <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">02 — Consegni il lavoro</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
-              Carichi il modello 3D finale, conforme al disegno tecnico ricevuto. L&apos;azienda lo
-              visiona nel browser, senza poterlo scaricare finché non approva.
+              Carichi il file finale, conforme al disegno tecnico ricevuto. L&apos;azienda può
+              scaricarlo subito: il pagamento è già bloccato dal momento in cui ti ha scelto.
             </p>
           </li>
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
             <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">03 — Vieni pagato</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
-              Approvazione dell&apos;azienda, o rilascio automatico dopo 14 giorni se non risponde.
+              Approvazione dell&apos;azienda, o rilascio automatico dopo 30 giorni se non risponde.
               In entrambi i casi, il pagamento arriva.
             </p>
           </li>
@@ -85,7 +84,7 @@ export default function ComeFunziona() {
           <p className="text-sm text-[var(--blueprint-text-dim)]">
             10% a carico dell&apos;azienda + 10% a carico del disegnatore, calcolati sul valore del
             lavoro. Nessun costo di iscrizione: si paga solo quando un lavoro viene chiuso con
-            successo.
+            successo. Ogni lavoro include 3 revisioni gratuite.
           </p>
         </div>
       </section>
