@@ -9,6 +9,7 @@ const ESTENSIONI_CONSENTITE = [
   "obj", "fbx", "skp", "stp", "step",
   "iges", "igs", "3dm", "glb", "gltf",
   "zip", "rar", "rvt",
+  "png", "jpg", "jpeg", "webp", "gif",
 ];
 
 function estensione(nomeFile: string): string {

@@ -319,27 +319,29 @@ export async function richiediRevisione(input: {
   lavoroId: string;
   tipo: "errore" | "modifica";
   motivo: string;
-  disegnoUrl?: string;
-  disegnoNome?: string;
+  disegnoUrl: string;
+  disegnoNome: string;
 }): Promise<RisultatoRevisione> {
   const lavoro = await getLavoro(input.lavoroId);
   if (!lavoro) return { ok: false, bloccatoDaExtra: false, errore: "Lavoro non trovato." };
 
-  if (input.tipo === "modifica") {
-    if (!input.disegnoUrl || !input.disegnoNome) {
-      return {
-        ok: false,
-        bloccatoDaExtra: false,
-        errore: "Per una modifica di progetto è obbligatorio allegare il nuovo disegno tecnico.",
-      };
-    }
-    if (lavoro.revisioniUsate >= REVISIONI_INCLUSE) {
-      return {
-        ok: false,
-        bloccatoDaExtra: true,
-        extra: calcolaExtraRevisione(lavoro.budget),
-      };
-    }
+  if (!input.disegnoUrl || !input.disegnoNome) {
+    return {
+      ok: false,
+      bloccatoDaExtra: false,
+      errore:
+        input.tipo === "modifica"
+          ? "Per una modifica di progetto è obbligatorio allegare il nuovo disegno tecnico."
+          : "Allega uno screenshot, una foto o un file che mostri l'errore da correggere.",
+    };
+  }
+
+  if (input.tipo === "modifica" && lavoro.revisioniUsate >= REVISIONI_INCLUSE) {
+    return {
+      ok: false,
+      bloccatoDaExtra: true,
+      extra: calcolaExtraRevisione(lavoro.budget),
+    };
   }
 
   const id = "r" + Date.now();
@@ -348,8 +350,8 @@ export async function richiediRevisione(input: {
     lavoroId: input.lavoroId,
     tipo: input.tipo,
     motivo: input.motivo,
-    disegnoUrl: input.disegnoUrl ?? null,
-    disegnoNome: input.disegnoNome ?? null,
+    disegnoUrl: input.disegnoUrl,
+    disegnoNome: input.disegnoNome,
   });
 
   const aggiornamento: Record<string, unknown> = {

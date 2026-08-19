@@ -142,8 +142,8 @@ export default function PannelloConsegna({
       body: JSON.stringify({
         motivo,
         tipo: tipoRevisione,
-        disegnoUrl: tipoRevisione === "modifica" ? disegnoUrl : undefined,
-        disegnoNome: tipoRevisione === "modifica" ? disegnoNome : undefined,
+        disegnoUrl,
+        disegnoNome,
       }),
     });
     if (!res.ok) {
@@ -297,7 +297,7 @@ export default function PannelloConsegna({
                 <p className="text-xs text-[var(--blueprint-text-dim)] mt-2">
                   {tipoRevisione === "errore"
                     ? "Il file consegnato non rispetta il disegno tecnico originale. Gratuito, illimitato, non conta come revisione."
-                    : "Cambi qualcosa rispetto al disegno tecnico di partenza. Richiede un nuovo disegno allegato e conta come una delle 3 revisioni incluse."}
+                    : "Cambi qualcosa rispetto al disegno tecnico di partenza. Conta come una delle 3 revisioni incluse."}
                 </p>
               </div>
 
@@ -313,6 +313,27 @@ export default function PannelloConsegna({
                 }
                 className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-3 py-2 text-sm focus:outline-none focus:border-[var(--blueprint-amber)]"
               />
+
+              {tipoRevisione === "errore" && (
+                <div className="border border-dashed border-[var(--blueprint-line)] p-4 text-center">
+                  <input
+                    type="file"
+                    id="disegno-revisione"
+                    className="hidden"
+                    onChange={caricaDisegnoRevisione}
+                  />
+                  <label
+                    htmlFor="disegno-revisione"
+                    className="cursor-pointer font-mono-cad text-sm text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]"
+                  >
+                    {caricamentoDisegno
+                      ? "caricamento..."
+                      : disegnoNome
+                      ? `⌗ ${disegnoNome}`
+                      : "+ allega screenshot, foto o file con l'errore evidenziato — obbligatorio"}
+                  </label>
+                </div>
+              )}
 
               {tipoRevisione === "modifica" && !revisioniEsaurite && (
                 <div className="border border-dashed border-[var(--blueprint-line)] p-4 text-center">
@@ -330,7 +351,7 @@ export default function PannelloConsegna({
                       ? "caricamento..."
                       : disegnoNome
                       ? `⌗ ${disegnoNome}`
-                      : "+ allega nuovo disegno tecnico — obbligatorio"}
+                      : "+ allega il nuovo disegno tecnico — obbligatorio"}
                   </label>
                 </div>
               )}
@@ -372,7 +393,8 @@ export default function PannelloConsegna({
                   disabled={
                     invio ||
                     caricamentoDisegno ||
-                    (tipoRevisione === "modifica" && (revisioniEsaurite || !disegnoUrl))
+                    !disegnoUrl ||
+                    (tipoRevisione === "modifica" && revisioniEsaurite)
                   }
                   className="font-mono-cad text-sm border border-[var(--blueprint-amber)] text-[var(--blueprint-amber)] px-4 py-2 hover:bg-[var(--blueprint-amber)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40"
                 >
