@@ -1,7 +1,5 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // Con un dominio non ancora verificato su Resend, il mittente deve restare
 // onboarding@resend.dev. Quando colleghi un dominio tuo (es. verificad.it)
 // su Resend, cambia questo indirizzo in qualcosa come noreply@verificad.it.
@@ -9,6 +7,7 @@ const MITTENTE = "VerifiCAD <onboarding@resend.dev>";
 
 export async function inviaEmailVerifica(destinatario: string, nome: string, link: string) {
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     await resend.emails.send({
       from: MITTENTE,
       to: destinatario,
