@@ -41,6 +41,15 @@ create table if not exists sessioni (
   "creatoIl" timestamptz not null default now()
 );
 
+create table if not exists profili (
+  "utenteId" text primary key references utenti(id),
+  competenze text not null default '',
+  "programmiCad" text not null default '',
+  "cvUrl" text,
+  "cvNome" text,
+  "aggiornatoIl" timestamptz not null default now()
+);
+
 create table if not exists candidature (
   id text primary key,
   "lavoroId" text not null references lavori(id),

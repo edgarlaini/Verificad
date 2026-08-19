@@ -27,6 +27,24 @@ export interface Disegnatore {
   valutazione: number;
 }
 
+export interface Profilo {
+  utenteId: string;
+  competenze: string;
+  programmiCad: string[];
+  cvUrl: string | null;
+  cvNome: string | null;
+}
+
+export const PROGRAMMI_CAD_DISPONIBILI = [
+  "AutoCAD",
+  "Rhino",
+  "SolidWorks",
+  "Revit",
+  "Inventor",
+  "SketchUp",
+  "Allplan",
+];
+
 export interface Candidatura {
   id: string;
   lavoroId: string;
@@ -93,6 +111,58 @@ export async function getDisegnatori(): Promise<Disegnatore[]> {
     ...r,
     competenze: r.competenze.split(","),
   }));
+}
+
+export async function getProfilo(utenteId: string): Promise<Profilo> {
+  const { data } = await supabase
+    .from("profili")
+    .select("*")
+    .eq("utenteId", utenteId)
+    .maybeSingle();
+
+  if (!data) {
+    return { utenteId, competenze: "", programmiCad: [], cvUrl: null, cvNome: null };
+  }
+
+  return {
+    utenteId,
+    competenze: data.competenze ?? "",
+    programmiCad: data.programmiCad ? data.programmiCad.split(",").filter(Boolean) : [],
+    cvUrl: data.cvUrl ?? null,
+    cvNome: data.cvNome ?? null,
+  };
+}
+
+export async function salvaProfilo(input: {
+  utenteId: string;
+  competenze: string;
+  programmiCad: string[];
+}): Promise<void> {
+  await supabase.from("profili").upsert(
+    {
+      utenteId: input.utenteId,
+      competenze: input.competenze,
+      programmiCad: input.programmiCad.join(","),
+      aggiornatoIl: new Date().toISOString(),
+    },
+    { onConflict: "utenteId" }
+  );
+}
+
+export async function salvaCvProfilo(input: {
+  utenteId: string;
+  cvUrl: string;
+  cvNome: string;
+}): Promise<void> {
+  await supabase.from("profili").upsert(
+    {
+      utenteId: input.utenteId,
+      cvUrl: input.cvUrl,
+      cvNome: input.cvNome,
+      aggiornatoIl: new Date().toISOString(),
+    },
+    { onConflict: "utenteId" }
+  );
 }
 
 export async function creaCandidatura(input: {

@@ -57,6 +57,7 @@ export default function HeaderNav() {
             {utente.ruolo === "azienda" && (
               <Link href="/lavori/nuovo" className={bottoneClass}>+ pubblica lavoro</Link>
             )}
+            <Link href="/profilo" className={linkClass}>il mio profilo</Link>
             <span className="text-xs text-[var(--blueprint-text-dim)]">
               {utente.nome} · {utente.ruolo}
             </span>
@@ -89,6 +90,9 @@ export default function HeaderNav() {
                   + pubblica lavoro
                 </Link>
               )}
+              <Link href="/profilo" className={linkClass} onClick={() => setMenuAperto(false)}>
+                il mio profilo
+              </Link>
               <span className="text-xs text-[var(--blueprint-text-dim)] pt-3 border-t border-[var(--blueprint-line)] mt-2">
                 {utente.nome} · {utente.ruolo}
               </span>
