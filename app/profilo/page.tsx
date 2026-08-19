@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const PROGRAMMI_CAD_DISPONIBILI = [
-  "AutoCAD",
+  "AutoCAD 2D",
+  "AutoCAD 3D",
   "Rhino",
   "SolidWorks",
   "Revit",

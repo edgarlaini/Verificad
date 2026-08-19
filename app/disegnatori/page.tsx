@@ -11,34 +11,55 @@ export default async function Disegnatori() {
       </p>
       <h1 className="text-2xl font-semibold mb-8">Disegnatori CAD</h1>
 
-      <div className="grid sm:grid-cols-2 gap-4">
-        {disegnatori.map((d) => (
-          <div
-            key={d.id}
-            className="border border-[var(--blueprint-line)] bg-[var(--blueprint-bg-2)]/60 p-5"
-          >
-            <div className="flex items-start justify-between mb-3">
-              <h3 className="text-lg font-medium">{d.nome}</h3>
-              <span className="font-mono-cad text-sm text-[var(--blueprint-amber)]">
-                ★ {d.valutazione}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {d.competenze.map((c) => (
-                <span
-                  key={c}
-                  className="font-mono-cad text-[10px] border border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)] px-2 py-1"
-                >
-                  {c}
+      {disegnatori.length === 0 ? (
+        <p className="text-sm text-[var(--blueprint-text-dim)] font-mono-cad">
+          Nessun disegnatore registrato ancora.
+        </p>
+      ) : (
+        <div className="grid sm:grid-cols-2 gap-4">
+          {disegnatori.map((d) => (
+            <div
+              key={d.id}
+              className="border border-[var(--blueprint-line)] bg-[var(--blueprint-bg-2)]/60 p-5"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <h3 className="text-lg font-medium">{d.nome}</h3>
+                <span className="font-mono-cad text-xs text-[var(--blueprint-text-dim)]">
+                  {d.lavoriCompletati > 0 ? `${d.lavoriCompletati} lavori completati` : "nuovo profilo"}
                 </span>
-              ))}
+              </div>
+
+              {d.competenze && (
+                <p className="text-sm text-[var(--blueprint-text-dim)] mb-3">{d.competenze}</p>
+              )}
+
+              {d.programmiCad.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {d.programmiCad.map((c) => (
+                    <span
+                      key={c}
+                      className="font-mono-cad text-[10px] border border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)] px-2 py-1"
+                    >
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {d.cvUrl && (
+                <a
+                  href={d.cvUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block text-xs font-mono-cad text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]"
+                >
+                  vedi CV →
+                </a>
+              )}
             </div>
-            <p className="text-xs text-[var(--blueprint-text-dim)] font-mono-cad">
-              {d.lavoriCompletati} lavori completati
-            </p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

@@ -72,15 +72,3 @@ where not exists (select 1 from lavori where id = 'l2');
 insert into lavori (id, titolo, descrizione, azienda, budget, scadenza, "disegnoAllegato", stato)
 select 'l3', 'Design nautico — interni cabina', 'Modello 3D interni cabina barca a vela 12m, rispetto rigoroso delle quote di ingombro.', 'Cantiere Adriatico', 800, '2026-09-20', 'cabina_sezioni.dwg', 'aperto'
 where not exists (select 1 from lavori where id = 'l3');
-
-insert into disegnatori (id, nome, competenze, "lavoriCompletati", valutazione)
-select 'd1', 'Marco B.', 'AutoCAD,SolidWorks,Revit', 12, 4.8
-where not exists (select 1 from disegnatori where id = 'd1');
-
-insert into disegnatori (id, nome, competenze, "lavoriCompletati", valutazione)
-select 'd2', 'Giulia T.', 'Rhino,AutoCAD,SketchUp', 7, 4.9
-where not exists (select 1 from disegnatori where id = 'd2');
-
-insert into disegnatori (id, nome, competenze, "lavoriCompletati", valutazione)
-select 'd3', 'Luca F.', 'AutoCAD,Inventor', 21, 4.7
-where not exists (select 1 from disegnatori where id = 'd3');

@@ -19,14 +19,6 @@ export interface Lavoro {
   motivoRevisione?: string | null;
 }
 
-export interface Disegnatore {
-  id: string;
-  nome: string;
-  competenze: string[];
-  lavoriCompletati: number;
-  valutazione: number;
-}
-
 export interface Profilo {
   utenteId: string;
   competenze: string;
@@ -36,7 +28,8 @@ export interface Profilo {
 }
 
 export const PROGRAMMI_CAD_DISPONIBILI = [
-  "AutoCAD",
+  "AutoCAD 2D",
+  "AutoCAD 3D",
   "Rhino",
   "SolidWorks",
   "Revit",
@@ -104,13 +97,47 @@ export async function creaLavoro(input: {
   return id;
 }
 
-export async function getDisegnatori(): Promise<Disegnatore[]> {
-  const { data, error } = await supabase.from("disegnatori").select("*");
-  if (error || !data) return [];
-  return (data as Array<Disegnatore & { competenze: string }>).map((r) => ({
-    ...r,
-    competenze: r.competenze.split(","),
-  }));
+export interface DisegnatoreReale {
+  id: string;
+  nome: string;
+  competenze: string;
+  programmiCad: string[];
+  cvUrl: string | null;
+  lavoriCompletati: number;
+}
+
+export async function getDisegnatori(): Promise<DisegnatoreReale[]> {
+  const { data: utenti, error } = await supabase
+    .from("utenti")
+    .select("id, nome")
+    .eq("ruolo", "disegnatore");
+  if (error || !utenti || utenti.length === 0) return [];
+
+  const ids = utenti.map((u) => u.id);
+
+  const [{ data: profili }, { data: lavoriChiusi }] = await Promise.all([
+    supabase.from("profili").select("*").in("utenteId", ids),
+    supabase.from("lavori").select("disegnatoreUtenteId").eq("stato", "chiuso").in("disegnatoreUtenteId", ids),
+  ]);
+
+  const profiloPerUtente = new Map((profili ?? []).map((p) => [p.utenteId, p]));
+  const completatiPerUtente = new Map<string, number>();
+  for (const l of lavoriChiusi ?? []) {
+    const id = l.disegnatoreUtenteId as string;
+    completatiPerUtente.set(id, (completatiPerUtente.get(id) ?? 0) + 1);
+  }
+
+  return utenti.map((u) => {
+    const p = profiloPerUtente.get(u.id);
+    return {
+      id: u.id,
+      nome: u.nome,
+      competenze: p?.competenze ?? "",
+      programmiCad: p?.programmiCad ? (p.programmiCad as string).split(",").filter(Boolean) : [],
+      cvUrl: p?.cvUrl ?? null,
+      lavoriCompletati: completatiPerUtente.get(u.id) ?? 0,
+    };
+  });
 }
 
 export async function getProfilo(utenteId: string): Promise<Profilo> {
