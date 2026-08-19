@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Visualizzatore3D from "./Visualizzatore3D";
 
 interface Utente {
   id: string;
@@ -15,6 +14,7 @@ interface Props {
   disegnatoreUtenteId: string | null | undefined;
   aziendaUtenteId: string | null | undefined;
   consegnaFile: string | null | undefined;
+  consegnaNome: string | null | undefined;
   dataConsegna: string | null | undefined;
   motivoRevisione: string | null | undefined;
   giorniRimanenti: number;
@@ -26,12 +26,15 @@ export default function PannelloConsegna({
   disegnatoreUtenteId,
   aziendaUtenteId,
   consegnaFile,
+  consegnaNome,
   motivoRevisione,
   giorniRimanenti,
 }: Props) {
   const router = useRouter();
   const [utente, setUtente] = useState<Utente | null | undefined>(undefined);
   const [fileNome, setFileNome] = useState("");
+  const [fileUrl, setFileUrl] = useState("");
+  const [caricamentoFile, setCaricamentoFile] = useState(false);
   const [motivo, setMotivo] = useState("");
   const [invio, setInvio] = useState(false);
   const [errore, setErrore] = useState("");
@@ -43,6 +46,29 @@ export default function PannelloConsegna({
       .then((d) => setUtente(d.utente));
   }, []);
 
+  async function caricaFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setErrore("");
+    setCaricamentoFile(true);
+    setFileNome("");
+    setFileUrl("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    setCaricamentoFile(false);
+
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      setErrore(d.error || "Errore nel caricamento del file.");
+      return;
+    }
+    const data = await res.json();
+    setFileNome(data.nome);
+    setFileUrl(data.url);
+  }
+
   async function consegna(e: React.FormEvent) {
     e.preventDefault();
     setErrore("");
@@ -50,7 +76,7 @@ export default function PannelloConsegna({
     const res = await fetch(`/api/lavori/${lavoroId}/consegna`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ consegnaFile: fileNome }),
+      body: JSON.stringify({ consegnaFile: fileUrl, consegnaNome: fileNome }),
     });
     if (!res.ok) {
       const d = await res.json().catch(() => ({}));
@@ -113,26 +139,25 @@ export default function PannelloConsegna({
       {sonoDisegnatoreAssegnato && stato === "in_corso" && (
         <form onSubmit={consegna} className="space-y-3">
           <p className="text-sm text-[var(--blueprint-text-dim)]">
-            Carica il modello 3D finale, conforme al disegno tecnico allegato.
+            Carica il file finale, conforme al disegno tecnico allegato.
           </p>
           <div className="border border-dashed border-[var(--blueprint-line)] p-4 text-center">
-            <input
-              type="file"
-              id="consegna-file"
-              className="hidden"
-              onChange={(e) => setFileNome(e.target.files?.[0]?.name ?? "")}
-            />
+            <input type="file" id="consegna-file" className="hidden" onChange={caricaFile} />
             <label
               htmlFor="consegna-file"
               className="cursor-pointer font-mono-cad text-sm text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]"
             >
-              {fileNome ? `⌗ ${fileNome}` : "+ carica modello 3D (OBJ, FBX, SKP...)"}
+              {caricamentoFile
+                ? "caricamento..."
+                : fileNome
+                ? `⌗ ${fileNome}`
+                : "+ carica file (DWG, DXF, OBJ, FBX, SKP...)"}
             </label>
           </div>
           {errore && <p className="text-sm text-red-400 font-mono-cad">{errore}</p>}
           <button
             type="submit"
-            disabled={!fileNome || invio}
+            disabled={!fileUrl || caricamentoFile || invio}
             className="font-mono-cad text-sm border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-4 py-2 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40"
           >
             {invio ? "INVIO..." : "CONSEGNA LAVORO →"}
@@ -141,21 +166,29 @@ export default function PannelloConsegna({
       )}
 
       {sonoDisegnatoreAssegnato && stato === "in_revisione" && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <p className="text-sm text-[var(--blueprint-accent-strong)] font-mono-cad">
-            ✓ Consegnato: {consegnaFile}. In attesa di approvazione (
+            ✓ Consegnato: {consegnaNome || consegnaFile}. In attesa di approvazione (
             {giorniRimanenti} {giorniRimanenti === 1 ? "giorno" : "giorni"} al rilascio automatico).
           </p>
-          <Visualizzatore3D nomeFile={consegnaFile || "modello"} />
         </div>
       )}
 
       {sonoAziendaProprietaria && stato === "in_revisione" && (
         <div className="space-y-4">
-          <p className="text-sm">
-            Consegnato: <span className="text-[var(--blueprint-accent-strong)]">{consegnaFile}</span>
-          </p>
-          <Visualizzatore3D nomeFile={consegnaFile || "modello"} />
+          <div className="border border-[var(--blueprint-accent)] p-3 flex items-center justify-between gap-3">
+            <span className="font-mono-cad text-sm">⌗ {consegnaNome || consegnaFile}</span>
+            {consegnaFile && (
+              <a
+                href={consegnaFile}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono-cad text-xs text-[var(--blueprint-accent-strong)] hover:underline shrink-0"
+              >
+                scarica →
+              </a>
+            )}
+          </div>
           <p className="text-xs text-[var(--blueprint-text-dim)] font-mono-cad">
             approvazione automatica tra {giorniRimanenti}{" "}
             {giorniRimanenti === 1 ? "giorno" : "giorni"} se non rispondi
@@ -217,11 +250,16 @@ export default function PannelloConsegna({
             ✓ Lavoro chiuso e pagamento rilasciato al disegnatore.
           </p>
           {(sonoAziendaProprietaria || sonoDisegnatoreAssegnato) && consegnaFile && (
-            <div className="border border-[var(--blueprint-accent)] p-3 flex items-center justify-between">
-              <span className="font-mono-cad text-sm">⌗ {consegnaFile}</span>
-              <span className="font-mono-cad text-xs text-[var(--blueprint-accent-strong)]">
-                file originale sbloccato — scaricabile
-              </span>
+            <div className="border border-[var(--blueprint-accent)] p-3 flex items-center justify-between gap-3">
+              <span className="font-mono-cad text-sm">⌗ {consegnaNome || consegnaFile}</span>
+              <a
+                href={consegnaFile}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono-cad text-xs text-[var(--blueprint-accent-strong)] hover:underline shrink-0"
+              >
+                scarica →
+              </a>
             </div>
           )}
         </div>

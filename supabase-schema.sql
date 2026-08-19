@@ -9,14 +9,20 @@ create table if not exists lavori (
   budget numeric not null,
   scadenza text not null,
   "disegnoAllegato" text not null,
+  "disegnoNome" text,
   stato text not null default 'aperto',
   "disegnatoreAssegnato" text,
   "disegnatoreUtenteId" text,
   "consegnaFile" text,
+  "consegnaNome" text,
   "dataConsegna" timestamptz,
   "motivoRevisione" text,
   "creatoIl" timestamptz not null default now()
 );
+
+-- Se la tabella lavori esisteva già da prima di questa modifica, esegui anche:
+alter table lavori add column if not exists "disegnoNome" text;
+alter table lavori add column if not exists "consegnaNome" text;
 
 create table if not exists disegnatori (
   id text primary key,

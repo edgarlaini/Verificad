@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { titolo, descrizione, budget, scadenza, disegnoAllegato } = body;
+  const { titolo, descrizione, budget, scadenza, disegnoAllegato, disegnoNome } = body;
 
   if (!titolo || !descrizione || !budget || !scadenza || !disegnoAllegato) {
     return NextResponse.json(
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
     budget: Number(budget),
     scadenza,
     disegnoAllegato,
+    disegnoNome: disegnoNome || disegnoAllegato,
   });
 
   return NextResponse.json({ id });

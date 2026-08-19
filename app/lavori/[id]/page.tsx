@@ -36,9 +36,14 @@ export default async function DettaglioLavoro({
         <p className="text-sm leading-relaxed">{lavoro.descrizione}</p>
         <div className="mt-4 pt-4 border-t border-[var(--blueprint-line)] flex items-center gap-2">
           <span className="font-mono-cad text-[var(--blueprint-accent)] text-sm">⌗</span>
-          <span className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)]">
-            {lavoro.disegnoAllegato}
-          </span>
+          <a
+            href={lavoro.disegnoAllegato}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] hover:underline"
+          >
+            {lavoro.disegnoNome || lavoro.disegnoAllegato}
+          </a>
           <span className="text-xs text-[var(--blueprint-text-dim)] ml-auto">
             riferimento per la verifica del modello consegnato
           </span>
@@ -101,6 +106,7 @@ export default async function DettaglioLavoro({
         disegnatoreUtenteId={lavoro.disegnatoreUtenteId}
         aziendaUtenteId={lavoro.aziendaUtenteId}
         consegnaFile={lavoro.consegnaFile}
+        consegnaNome={lavoro.consegnaNome}
         dataConsegna={lavoro.dataConsegna}
         motivoRevisione={lavoro.motivoRevisione}
         giorniRimanenti={

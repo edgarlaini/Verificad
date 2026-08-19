@@ -11,10 +11,12 @@ export interface Lavoro {
   budget: number;
   scadenza: string;
   disegnoAllegato: string;
+  disegnoNome?: string | null;
   stato: StatoLavoro;
   disegnatoreAssegnato?: string | null;
   disegnatoreUtenteId?: string | null;
   consegnaFile?: string | null;
+  consegnaNome?: string | null;
   dataConsegna?: string | null;
   motivoRevisione?: string | null;
 }
@@ -91,6 +93,7 @@ export async function creaLavoro(input: {
   budget: number;
   scadenza: string;
   disegnoAllegato: string;
+  disegnoNome: string;
 }): Promise<string> {
   const id = "l" + Date.now();
   await supabase.from("lavori").insert({ id, ...input, stato: "aperto" });
@@ -254,6 +257,7 @@ export async function consegnaLavoro(input: {
   lavoroId: string;
   disegnatoreUtenteId: string;
   consegnaFile: string;
+  consegnaNome: string;
 }): Promise<void> {
   const lavoro = await getLavoro(input.lavoroId);
   if (!lavoro) throw new Error("Lavoro non trovato");
@@ -265,6 +269,7 @@ export async function consegnaLavoro(input: {
     .update({
       stato: "in_revisione",
       consegnaFile: input.consegnaFile,
+      consegnaNome: input.consegnaNome,
       dataConsegna: new Date().toISOString(),
       motivoRevisione: null,
     })
@@ -281,6 +286,7 @@ export async function richiediRevisione(lavoroId: string, motivo: string): Promi
     .update({
       stato: "in_corso",
       consegnaFile: null,
+      consegnaNome: null,
       dataConsegna: null,
       motivoRevisione: motivo,
     })

@@ -7,9 +7,34 @@ export default function NuovoLavoro() {
   const router = useRouter();
   const [budget, setBudget] = useState<number>(500);
   const [fileNome, setFileNome] = useState<string>("");
+  const [fileUrl, setFileUrl] = useState<string>("");
+  const [caricamentoFile, setCaricamentoFile] = useState(false);
   const [invio, setInvio] = useState(false);
   const [errore, setErrore] = useState("");
   const split = calcolaCommissione(budget || 0);
+
+  async function caricaDisegno(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setErrore("");
+    setCaricamentoFile(true);
+    setFileNome("");
+    setFileUrl("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    setCaricamentoFile(false);
+
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      setErrore(d.error || "Errore nel caricamento del disegno.");
+      return;
+    }
+    const data = await res.json();
+    setFileNome(data.nome);
+    setFileUrl(data.url);
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -21,7 +46,8 @@ export default function NuovoLavoro() {
       descrizione: form.get("descrizione"),
       budget: Number(form.get("budget")),
       scadenza: form.get("scadenza"),
-      disegnoAllegato: fileNome,
+      disegnoAllegato: fileUrl,
+      disegnoNome: fileNome,
     };
 
     const res = await fetch("/api/lavori", {
@@ -87,13 +113,17 @@ export default function NuovoLavoro() {
               type="file"
               id="disegno"
               className="hidden"
-              onChange={(e) => setFileNome(e.target.files?.[0]?.name ?? "")}
+              onChange={caricaDisegno}
             />
             <label
               htmlFor="disegno"
               className="cursor-pointer font-mono-cad text-sm text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]"
             >
-              {fileNome ? `⌗ ${fileNome}` : "+ carica DWG / PDF"}
+              {caricamentoFile
+                ? "caricamento..."
+                : fileNome
+                ? `⌗ ${fileNome}`
+                : "+ carica DWG / DXF / PDF"}
             </label>
           </div>
         </div>
@@ -146,10 +176,10 @@ export default function NuovoLavoro() {
 
         <button
           type="submit"
-          disabled={!fileNome || invio}
+          disabled={!fileUrl || caricamentoFile || invio}
           className="w-full font-mono-cad text-sm tracking-widest border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] py-3 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[var(--blueprint-accent-strong)]"
         >
-          {!fileNome
+          {!fileUrl
             ? "CARICA IL DISEGNO PER CONTINUARE"
             : invio
             ? "PUBBLICAZIONE IN CORSO..."

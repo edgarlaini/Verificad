@@ -26,14 +26,19 @@ export async function POST(
     );
   }
 
-  const { consegnaFile } = await req.json();
+  const { consegnaFile, consegnaNome } = await req.json();
   if (!consegnaFile) {
     return NextResponse.json(
-      { error: "Carica il file del modello 3D per completare la consegna." },
+      { error: "Carica il file del modello per completare la consegna." },
       { status: 400 }
     );
   }
 
-  await consegnaLavoro({ lavoroId: id, disegnatoreUtenteId: utente.id, consegnaFile });
+  await consegnaLavoro({
+    lavoroId: id,
+    disegnatoreUtenteId: utente.id,
+    consegnaFile,
+    consegnaNome: consegnaNome || consegnaFile,
+  });
   return NextResponse.json({ ok: true });
 }
