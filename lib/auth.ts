@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { cookies } from "next/headers";
 import { supabase } from "./supabase";
+import { inviaEmailVerifica } from "./email";
 
 export type Ruolo = "azienda" | "disegnatore";
 
@@ -19,6 +20,7 @@ export async function registraUtente(input: {
   password: string;
   ruolo: Ruolo;
   nome: string;
+  baseUrl: string;
 }): Promise<{ ok: true; utente: Utente } | { ok: false; errore: string }> {
   const emailLower = input.email.toLowerCase();
   const { data: esistente } = await supabase
@@ -32,6 +34,7 @@ export async function registraUtente(input: {
 
   const id = "u" + crypto.randomUUID();
   const passwordHash = await bcrypt.hash(input.password, 10);
+  const tokenVerifica = crypto.randomBytes(24).toString("hex");
 
   const { error } = await supabase.from("utenti").insert({
     id,
@@ -39,8 +42,13 @@ export async function registraUtente(input: {
     passwordHash,
     ruolo: input.ruolo,
     nome: input.nome,
+    emailVerificata: false,
+    tokenVerifica,
   });
   if (error) return { ok: false, errore: "Errore nella registrazione." };
+
+  const link = `${input.baseUrl}/api/auth/verifica-email?token=${tokenVerifica}`;
+  await inviaEmailVerifica(emailLower, input.nome, link);
 
   return { ok: true, utente: { id, email: emailLower, ruolo: input.ruolo, nome: input.nome } };
 }

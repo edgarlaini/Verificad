@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Ruolo non valido." }, { status: 400 });
   }
 
-  const risultato = await registraUtente({ email, password, ruolo, nome });
+  const baseUrl = req.nextUrl.origin;
+  const risultato = await registraUtente({ email, password, ruolo, nome, baseUrl });
   if (!risultato.ok) {
     return NextResponse.json({ error: risultato.errore }, { status: 400 });
   }
