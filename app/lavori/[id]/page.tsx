@@ -22,7 +22,7 @@ export default async function DettaglioLavoro({
       <p className="font-mono-cad text-xs tracking-[0.3em] text-[var(--blueprint-accent)] mb-4">
         TAV. 04 — DETTAGLIO LAVORO
       </p>
-      <div className="flex items-start justify-between gap-4 mb-2">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 sm:gap-4 mb-2">
         <h1 className="text-2xl font-semibold">{lavoro.titolo}</h1>
         <span className="font-mono-cad text-[10px] tracking-widest border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-2 py-1 shrink-0">
           {statoLabel[lavoro.stato].toUpperCase()}

@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="it">
       <body className={`${mono.variable} ${body.variable} antialiased`}>
         <HeroScene />
-        <header className="border-b border-[var(--blueprint-line)]">
+        <header className="relative border-b border-[var(--blueprint-line)]">
           <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
             <Link href="/come-funziona" className="flex items-center gap-2">
               <span className="font-mono-cad text-[var(--blueprint-accent-strong)] text-sm tracking-widest">
@@ -47,7 +47,7 @@ export default function RootLayout({
         </header>
         {children}
         <footer className="border-t border-[var(--blueprint-line)] mt-24">
-          <div className="max-w-5xl mx-auto px-6 py-6 text-xs font-mono-cad text-[var(--blueprint-text-dim)] flex justify-between">
+          <div className="max-w-5xl mx-auto px-6 py-6 text-xs font-mono-cad text-[var(--blueprint-text-dim)] flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between">
             <span>VERIFICAD — SCALA 1:1 — REV. MVP</span>
             <span>commissione 10% + 10% · pagamento protetto</span>
           </div>

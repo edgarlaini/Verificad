@@ -13,6 +13,7 @@ interface Utente {
 export default function HeaderNav() {
   const router = useRouter();
   const [utente, setUtente] = useState<Utente | null | undefined>(undefined);
+  const [menuAperto, setMenuAperto] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -23,55 +24,88 @@ export default function HeaderNav() {
   async function esci() {
     await fetch("/api/auth/esci", { method: "POST" });
     setUtente(null);
+    setMenuAperto(false);
     router.push("/");
     router.refresh();
   }
 
-  return (
-    <nav className="flex items-center gap-6 text-sm font-mono-cad text-[var(--blueprint-text-dim)]">
-      <Link href="/come-funziona" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
-        come funziona
-      </Link>
-      <Link href="/" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
-        bacheca
-      </Link>
-      <Link href="/disegnatori" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
-        disegnatori
-      </Link>
+  const linkClass =
+    "hover:text-[var(--blueprint-accent-strong)] transition-colors py-2 sm:py-0";
+  const bottoneClass =
+    "border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors text-center";
 
-      {utente === undefined ? null : utente ? (
-        <>
-          {utente.ruolo === "azienda" && (
-            <Link
-              href="/lavori/nuovo"
-              className="border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors"
-            >
-              + pubblica lavoro
-            </Link>
+  return (
+    <>
+      {/* Pulsante hamburger, solo su mobile */}
+      <button
+        onClick={() => setMenuAperto(!menuAperto)}
+        aria-label="Apri menu"
+        className="sm:hidden font-mono-cad text-[var(--blueprint-accent-strong)] text-xl leading-none px-1"
+      >
+        {menuAperto ? "✕" : "☰"}
+      </button>
+
+      {/* Menu su schermi normali: riga orizzontale */}
+      <nav className="hidden sm:flex items-center gap-6 text-sm font-mono-cad text-[var(--blueprint-text-dim)]">
+        <Link href="/come-funziona" className={linkClass}>come funziona</Link>
+        <Link href="/" className={linkClass}>bacheca</Link>
+        <Link href="/disegnatori" className={linkClass}>disegnatori</Link>
+
+        {utente === undefined ? null : utente ? (
+          <>
+            {utente.ruolo === "azienda" && (
+              <Link href="/lavori/nuovo" className={bottoneClass}>+ pubblica lavoro</Link>
+            )}
+            <span className="text-xs text-[var(--blueprint-text-dim)]">
+              {utente.nome} · {utente.ruolo}
+            </span>
+            <button onClick={esci} className={linkClass}>esci</button>
+          </>
+        ) : (
+          <>
+            <Link href="/accedi" className={linkClass}>accedi</Link>
+            <Link href="/registrati" className={bottoneClass}>registrati</Link>
+          </>
+        )}
+      </nav>
+
+      {/* Menu a tendina su mobile, sotto l'header */}
+      {menuAperto && (
+        <nav className="sm:hidden absolute top-full left-0 right-0 bg-[#0b1e2e] border-b border-[var(--blueprint-line)] flex flex-col px-6 py-4 gap-1 text-sm font-mono-cad text-[var(--blueprint-text-dim)] z-50 shadow-xl">
+          <Link href="/come-funziona" className={linkClass} onClick={() => setMenuAperto(false)}>come funziona</Link>
+          <Link href="/" className={linkClass} onClick={() => setMenuAperto(false)}>bacheca</Link>
+          <Link href="/disegnatori" className={linkClass} onClick={() => setMenuAperto(false)}>disegnatori</Link>
+
+          {utente === undefined ? null : utente ? (
+            <>
+              {utente.ruolo === "azienda" && (
+                <Link
+                  href="/lavori/nuovo"
+                  onClick={() => setMenuAperto(false)}
+                  className={`${bottoneClass} mt-2`}
+                >
+                  + pubblica lavoro
+                </Link>
+              )}
+              <span className="text-xs text-[var(--blueprint-text-dim)] pt-3 border-t border-[var(--blueprint-line)] mt-2">
+                {utente.nome} · {utente.ruolo}
+              </span>
+              <button onClick={esci} className={`${linkClass} text-left`}>esci</button>
+            </>
+          ) : (
+            <>
+              <Link href="/accedi" className={linkClass} onClick={() => setMenuAperto(false)}>accedi</Link>
+              <Link
+                href="/registrati"
+                onClick={() => setMenuAperto(false)}
+                className={`${bottoneClass} mt-2`}
+              >
+                registrati
+              </Link>
+            </>
           )}
-          <span className="text-xs text-[var(--blueprint-text-dim)]">
-            {utente.nome} · {utente.ruolo}
-          </span>
-          <button
-            onClick={esci}
-            className="hover:text-[var(--blueprint-accent-strong)] transition-colors"
-          >
-            esci
-          </button>
-        </>
-      ) : (
-        <>
-          <Link href="/accedi" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
-            accedi
-          </Link>
-          <Link
-            href="/registrati"
-            className="border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors"
-          >
-            registrati
-          </Link>
-        </>
+        </nav>
       )}
-    </nav>
+    </>
   );
 }

@@ -40,7 +40,7 @@ export default async function Home() {
               href={`/lavori/${lavoro.id}`}
               className="group border border-[var(--blueprint-line)] bg-[var(--blueprint-bg-2)]/60 hover:border-[var(--blueprint-accent)] transition-colors p-5"
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3 mb-1">
                     <span
@@ -62,7 +62,7 @@ export default async function Home() {
                     ⌗ {lavoro.disegnoAllegato}
                   </p>
                 </div>
-                <div className="text-right shrink-0">
+                <div className="text-left sm:text-right shrink-0">
                   <p className="font-mono-cad text-xl text-[var(--blueprint-accent-strong)]">
                     €{lavoro.budget}
                   </p>
