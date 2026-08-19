@@ -23,6 +23,17 @@ create table if not exists lavori (
 -- Se la tabella lavori esisteva già da prima di questa modifica, esegui anche:
 alter table lavori add column if not exists "disegnoNome" text;
 alter table lavori add column if not exists "consegnaNome" text;
+alter table lavori add column if not exists "revisioniUsate" integer not null default 0;
+
+create table if not exists revisioni (
+  id text primary key,
+  "lavoroId" text not null references lavori(id),
+  tipo text not null check (tipo in ('errore', 'modifica')),
+  motivo text not null,
+  "disegnoUrl" text,
+  "disegnoNome" text,
+  "creatoIl" timestamptz not null default now()
+);
 
 create table if not exists disegnatori (
   id text primary key,

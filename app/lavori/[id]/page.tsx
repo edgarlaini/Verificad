@@ -1,6 +1,6 @@
 export const dynamic = "force-dynamic";
 
-import { getLavoro, statoLabel, giorniRimanentiRevisione } from "@/lib/data";
+import { getLavoro, statoLabel, giorniRimanentiRevisione, getRevisioniLavoro } from "@/lib/data";
 import { calcolaCommissione } from "@/lib/calc";
 import { notFound } from "next/navigation";
 import PannelloCandidature from "@/components/PannelloCandidature";
@@ -16,6 +16,7 @@ export default async function DettaglioLavoro({
   if (!lavoro) notFound();
 
   const split = calcolaCommissione(lavoro.budget);
+  const revisioni = await getRevisioniLavoro(id);
 
   return (
     <main className="max-w-3xl mx-auto px-6 py-16">
@@ -103,16 +104,57 @@ export default async function DettaglioLavoro({
       <PannelloConsegna
         lavoroId={lavoro.id}
         stato={lavoro.stato}
+        budget={lavoro.budget}
         disegnatoreUtenteId={lavoro.disegnatoreUtenteId}
         aziendaUtenteId={lavoro.aziendaUtenteId}
         consegnaFile={lavoro.consegnaFile}
         consegnaNome={lavoro.consegnaNome}
         dataConsegna={lavoro.dataConsegna}
         motivoRevisione={lavoro.motivoRevisione}
+        revisioniUsate={lavoro.revisioniUsate}
         giorniRimanenti={
           lavoro.dataConsegna ? giorniRimanentiRevisione(lavoro.dataConsegna) : 30
         }
       />
+
+      {revisioni.length > 0 && (
+        <div className="border border-[var(--blueprint-line)] p-6 mt-6">
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] mb-4">
+            CRONOLOGIA REVISIONI
+          </h2>
+          <ul className="space-y-4">
+            {revisioni.map((r) => (
+              <li key={r.id} className="border-l-2 border-[var(--blueprint-line)] pl-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span
+                    className={`font-mono-cad text-[10px] tracking-widest px-2 py-0.5 border ${
+                      r.tipo === "modifica"
+                        ? "border-[var(--blueprint-amber)] text-[var(--blueprint-amber)]"
+                        : "border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)]"
+                    }`}
+                  >
+                    {r.tipo === "modifica" ? "MODIFICA DI PROGETTO" : "ERRORE DA CORREGGERE"}
+                  </span>
+                  <span className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)]">
+                    {new Date(r.creatoIl).toLocaleDateString("it-IT")}
+                  </span>
+                </div>
+                <p className="text-sm text-[var(--blueprint-text-dim)]">{r.motivo}</p>
+                {r.tipo === "modifica" && r.disegnoUrl && (
+                  <a
+                    href={r.disegnoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-mono-cad text-xs text-[var(--blueprint-accent-strong)] hover:underline"
+                  >
+                    ⌗ {r.disegnoNome} →
+                  </a>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </main>
   );
 }

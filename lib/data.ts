@@ -19,6 +19,7 @@ export interface Lavoro {
   consegnaNome?: string | null;
   dataConsegna?: string | null;
   motivoRevisione?: string | null;
+  revisioniUsate: number;
 }
 
 export interface Profilo {
@@ -51,6 +52,15 @@ export interface Candidatura {
 }
 
 const GIORNI_APPROVAZIONE_AUTOMATICA = 30;
+export const REVISIONI_INCLUSE = 3;
+export const PERCENTUALE_EXTRA_REVISIONE = 0.2;
+
+export function calcolaExtraRevisione(budget: number) {
+  const totale = Math.round(budget * PERCENTUALE_EXTRA_REVISIONE * 100) / 100;
+  const commissioneAzienda = Math.round(budget * 0.1 * 100) / 100;
+  const commissioneDisegnatore = Math.round(budget * 0.1 * 100) / 100;
+  return { totale, commissioneAzienda, commissioneDisegnatore };
+}
 
 function scadenzaSuperata(dataConsegna: string): boolean {
   const consegnata = new Date(dataConsegna);
@@ -280,17 +290,84 @@ export async function approvaLavoro(lavoroId: string): Promise<void> {
   await supabase.from("lavori").update({ stato: "chiuso" }).eq("id", lavoroId);
 }
 
-export async function richiediRevisione(lavoroId: string, motivo: string): Promise<void> {
-  await supabase
-    .from("lavori")
-    .update({
-      stato: "in_corso",
-      consegnaFile: null,
-      consegnaNome: null,
-      dataConsegna: null,
-      motivoRevisione: motivo,
-    })
-    .eq("id", lavoroId);
+export interface Revisione {
+  id: string;
+  lavoroId: string;
+  tipo: "errore" | "modifica";
+  motivo: string;
+  disegnoUrl: string | null;
+  disegnoNome: string | null;
+  creatoIl: string;
+}
+
+export async function getRevisioniLavoro(lavoroId: string): Promise<Revisione[]> {
+  const { data, error } = await supabase
+    .from("revisioni")
+    .select("*")
+    .eq("lavoroId", lavoroId)
+    .order("creatoIl", { ascending: false });
+  if (error || !data) return [];
+  return data as Revisione[];
+}
+
+export type RisultatoRevisione =
+  | { ok: true }
+  | { ok: false; bloccatoDaExtra: true; extra: ReturnType<typeof calcolaExtraRevisione> }
+  | { ok: false; bloccatoDaExtra: false; errore: string };
+
+export async function richiediRevisione(input: {
+  lavoroId: string;
+  tipo: "errore" | "modifica";
+  motivo: string;
+  disegnoUrl?: string;
+  disegnoNome?: string;
+}): Promise<RisultatoRevisione> {
+  const lavoro = await getLavoro(input.lavoroId);
+  if (!lavoro) return { ok: false, bloccatoDaExtra: false, errore: "Lavoro non trovato." };
+
+  if (input.tipo === "modifica") {
+    if (!input.disegnoUrl || !input.disegnoNome) {
+      return {
+        ok: false,
+        bloccatoDaExtra: false,
+        errore: "Per una modifica di progetto è obbligatorio allegare il nuovo disegno tecnico.",
+      };
+    }
+    if (lavoro.revisioniUsate >= REVISIONI_INCLUSE) {
+      return {
+        ok: false,
+        bloccatoDaExtra: true,
+        extra: calcolaExtraRevisione(lavoro.budget),
+      };
+    }
+  }
+
+  const id = "r" + Date.now();
+  await supabase.from("revisioni").insert({
+    id,
+    lavoroId: input.lavoroId,
+    tipo: input.tipo,
+    motivo: input.motivo,
+    disegnoUrl: input.disegnoUrl ?? null,
+    disegnoNome: input.disegnoNome ?? null,
+  });
+
+  const aggiornamento: Record<string, unknown> = {
+    stato: "in_corso",
+    consegnaFile: null,
+    consegnaNome: null,
+    dataConsegna: null,
+    motivoRevisione: input.motivo,
+  };
+
+  if (input.tipo === "modifica") {
+    aggiornamento.revisioniUsate = lavoro.revisioniUsate + 1;
+    aggiornamento.disegnoAllegato = input.disegnoUrl;
+    aggiornamento.disegnoNome = input.disegnoNome;
+  }
+
+  await supabase.from("lavori").update(aggiornamento).eq("id", input.lavoroId);
+  return { ok: true };
 }
 
 export function giorniRimanentiRevisione(dataConsegna: string): number {
