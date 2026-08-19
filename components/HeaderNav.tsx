@@ -50,6 +50,7 @@ export default function HeaderNav() {
         <Link href="/come-funziona" className={linkClass}>come funziona</Link>
         <Link href="/" className={linkClass}>bacheca</Link>
         <Link href="/disegnatori" className={linkClass}>disegnatori</Link>
+        <Link href="/contatti" className={linkClass}>contatti</Link>
 
         {utente === undefined ? null : utente ? (
           <>
@@ -75,6 +76,7 @@ export default function HeaderNav() {
           <Link href="/come-funziona" className={linkClass} onClick={() => setMenuAperto(false)}>come funziona</Link>
           <Link href="/" className={linkClass} onClick={() => setMenuAperto(false)}>bacheca</Link>
           <Link href="/disegnatori" className={linkClass} onClick={() => setMenuAperto(false)}>disegnatori</Link>
+          <Link href="/contatti" className={linkClass} onClick={() => setMenuAperto(false)}>contatti</Link>
 
           {utente === undefined ? null : utente ? (
             <>

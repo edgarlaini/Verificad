@@ -34,3 +34,30 @@ export async function inviaEmailVerifica(destinatario: string, nome: string, lin
     return false;
   }
 }
+
+export async function inviaEmailContatto(input: {
+  nome: string;
+  email: string;
+  messaggio: string;
+}) {
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: MITTENTE,
+      to: "edgar.laini@gmail.com",
+      replyTo: input.email,
+      subject: `Nuovo messaggio da ${input.nome} — VerifiCAD`,
+      html: `
+        <div style="font-family: monospace; max-width: 480px; margin: 0 auto; padding: 24px; background: #0b1e2e; color: #dce8f0;">
+          <p style="color: #5fb4dd; letter-spacing: 0.2em; font-size: 12px;">VERIFICAD — CONTATTI</p>
+          <p style="font-size: 14px; margin: 16px 0 4px;"><strong>Da:</strong> ${input.nome} (${input.email})</p>
+          <p style="color: #7d97a8; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">${input.messaggio}</p>
+        </div>
+      `,
+    });
+    return true;
+  } catch (err) {
+    console.error("Errore invio email di contatto:", err);
+    return false;
+  }
+}
