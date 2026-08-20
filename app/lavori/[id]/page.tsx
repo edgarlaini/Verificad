@@ -137,6 +137,11 @@ export default async function DettaglioLavoro({
         giorniRimanenti={
           lavoro.dataConsegna ? giorniRimanentiRevisione(lavoro.dataConsegna) : 30
         }
+        contestato={lavoro.contestato}
+        contestazioneMotivo={lavoro.contestazioneMotivo}
+        contestazioneRispostaDisegnatore={lavoro.contestazioneRispostaDisegnatore}
+        contestazioneRisoltaIl={lavoro.contestazioneRisoltaIl}
+        percentualeRimborso={lavoro.percentualeRimborso}
       />
 
       {utente && (utente.id === lavoro.aziendaUtenteId || utente.id === lavoro.disegnatoreUtenteId) && (

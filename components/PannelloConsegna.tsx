@@ -20,6 +20,11 @@ interface Props {
   motivoRevisione: string | null | undefined;
   revisioniUsate: number;
   giorniRimanenti: number;
+  contestato: boolean;
+  contestazioneMotivo: string | null | undefined;
+  contestazioneRispostaDisegnatore: string | null | undefined;
+  contestazioneRisoltaIl: string | null | undefined;
+  percentualeRimborso: number | null | undefined;
 }
 
 const REVISIONI_INCLUSE = 3;
@@ -35,6 +40,11 @@ export default function PannelloConsegna({
   motivoRevisione,
   revisioniUsate,
   giorniRimanenti,
+  contestato,
+  contestazioneMotivo,
+  contestazioneRispostaDisegnatore,
+  contestazioneRisoltaIl,
+  percentualeRimborso,
 }: Props) {
   const router = useRouter();
   const [utente, setUtente] = useState<Utente | null | undefined>(undefined);
@@ -49,7 +59,9 @@ export default function PannelloConsegna({
   const [invio, setInvio] = useState(false);
   const [errore, setErrore] = useState("");
   const [bloccatoDaExtra, setBloccatoDaExtra] = useState<{ totale: number } | null>(null);
-  const [azione, setAzione] = useState<"nessuna" | "revisione">("nessuna");
+  const [azione, setAzione] = useState<"nessuna" | "revisione" | "contesta">("nessuna");
+  const [motivoContestazione, setMotivoContestazione] = useState("");
+  const [rispostaContestazione, setRispostaContestazione] = useState("");
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -160,6 +172,42 @@ export default function PannelloConsegna({
     router.refresh();
   }
 
+  async function inviaContestazione(e: React.FormEvent) {
+    e.preventDefault();
+    setErrore("");
+    setInvio(true);
+    const res = await fetch(`/api/lavori/${lavoroId}/contesta`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ motivo: motivoContestazione }),
+    });
+    setInvio(false);
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      setErrore(d.error || "Errore nell'apertura della contestazione.");
+      return;
+    }
+    router.refresh();
+  }
+
+  async function inviaRispostaContestazione(e: React.FormEvent) {
+    e.preventDefault();
+    setErrore("");
+    setInvio(true);
+    const res = await fetch(`/api/lavori/${lavoroId}/contesta/risposta`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ risposta: rispostaContestazione }),
+    });
+    setInvio(false);
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      setErrore(d.error || "Errore nell'invio della risposta.");
+      return;
+    }
+    router.refresh();
+  }
+
   if (utente === undefined) return null;
 
   const sonoDisegnatoreAssegnato =
@@ -168,6 +216,8 @@ export default function PannelloConsegna({
     utente?.ruolo === "azienda" && utente.id === aziendaUtenteId;
 
   if (!sonoDisegnatoreAssegnato && !sonoAziendaProprietaria) return null;
+
+  const contestazioneAperta = contestato && !contestazioneRisoltaIl;
 
   return (
     <div className="border border-[var(--blueprint-line)] p-6 mt-6">
@@ -185,6 +235,65 @@ export default function PannelloConsegna({
             REVISIONE RICHIESTA DALL&apos;AZIENDA
           </p>
           <p>{motivoRevisione}</p>
+        </div>
+      )}
+
+      {contestazioneRisoltaIl && (
+        <div className="border border-[var(--blueprint-accent)] p-3 mb-4 text-sm">
+          <p className="font-mono-cad text-[10px] text-[var(--blueprint-accent)] mb-1">
+            CONTESTAZIONE RISOLTA DA VERIFICAD
+          </p>
+          <p className="text-[var(--blueprint-text-dim)]">
+            Esito: {percentualeRimborso ?? 0}% rimborsato all&apos;azienda,{" "}
+            {100 - (percentualeRimborso ?? 0)}% versato al disegnatore.
+          </p>
+        </div>
+      )}
+
+      {contestazioneAperta && (
+        <div className="border border-[var(--blueprint-amber)] p-4 mb-4 space-y-4">
+          <div>
+            <p className="font-mono-cad text-[10px] text-[var(--blueprint-amber)] mb-1">
+              CONTESTAZIONE APERTA — IN VALUTAZIONE DA VERIFICAD
+            </p>
+            <p className="text-sm whitespace-pre-wrap">{contestazioneMotivo}</p>
+          </div>
+
+          {contestazioneRispostaDisegnatore && (
+            <div className="border-t border-[var(--blueprint-line)] pt-3">
+              <p className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] mb-1">
+                RISPOSTA DEL DISEGNATORE
+              </p>
+              <p className="text-sm whitespace-pre-wrap">{contestazioneRispostaDisegnatore}</p>
+            </div>
+          )}
+
+          {sonoDisegnatoreAssegnato && !contestazioneRispostaDisegnatore && (
+            <form onSubmit={inviaRispostaContestazione} className="space-y-3 border-t border-[var(--blueprint-line)] pt-3">
+              <p className="text-xs text-[var(--blueprint-text-dim)]">
+                Puoi rispondere con la tua versione prima che VerifiCAD decida.
+              </p>
+              <textarea
+                value={rispostaContestazione}
+                onChange={(e) => setRispostaContestazione(e.target.value)}
+                required
+                rows={3}
+                placeholder="Spiega la tua versione dei fatti..."
+                className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-3 py-2 text-sm focus:outline-none focus:border-[var(--blueprint-accent)]"
+              />
+              <button
+                type="submit"
+                disabled={invio}
+                className="font-mono-cad text-xs border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-4 py-2 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40"
+              >
+                {invio ? "INVIO..." : "INVIA RISPOSTA"}
+              </button>
+            </form>
+          )}
+
+          <p className="text-xs text-[var(--blueprint-text-dim)]">
+            Il rilascio automatico dei 30 giorni è sospeso finché la contestazione non viene risolta.
+          </p>
         </div>
       )}
 
@@ -217,7 +326,7 @@ export default function PannelloConsegna({
         </form>
       )}
 
-      {sonoDisegnatoreAssegnato && stato === "in_revisione" && (
+      {sonoDisegnatoreAssegnato && stato === "in_revisione" && !contestazioneAperta && (
         <div className="space-y-3">
           <p className="text-sm text-[var(--blueprint-accent-strong)] font-mono-cad">
             ✓ Consegnato: {consegnaNome || consegnaFile}. In attesa di approvazione (
@@ -226,7 +335,7 @@ export default function PannelloConsegna({
         </div>
       )}
 
-      {sonoAziendaProprietaria && stato === "in_revisione" && (
+      {sonoAziendaProprietaria && stato === "in_revisione" && !contestazioneAperta && (
         <div className="space-y-4">
           <div className="border border-[var(--blueprint-accent)] p-3 flex items-center justify-between gap-3">
             <span className="font-mono-cad text-sm">⌗ {consegnaNome || consegnaFile}</span>
@@ -247,7 +356,7 @@ export default function PannelloConsegna({
           </p>
 
           {azione === "nessuna" && (
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 onClick={approva}
                 disabled={invio}
@@ -261,7 +370,46 @@ export default function PannelloConsegna({
               >
                 richiedi revisione
               </button>
+              <button
+                onClick={() => setAzione("contesta")}
+                className="font-mono-cad text-sm border border-red-400 text-red-400 px-4 py-2 hover:bg-red-400 hover:text-[var(--blueprint-bg)] transition-colors"
+              >
+                contesta il lavoro
+              </button>
             </div>
+          )}
+
+          {azione === "contesta" && (
+            <form onSubmit={inviaContestazione} className="space-y-3">
+              <p className="text-xs text-[var(--blueprint-text-dim)]">
+                Usa la contestazione solo per problemi seri e non risolti — non per una correzione ordinaria, che puoi chiedere gratis con &quot;richiedi revisione&quot;. Apre una valutazione da parte di VerifiCAD e sospende il rilascio automatico del pagamento.
+              </p>
+              <textarea
+                value={motivoContestazione}
+                onChange={(e) => setMotivoContestazione(e.target.value)}
+                required
+                rows={4}
+                placeholder="Spiega perché il lavoro non è accettabile..."
+                className="w-full bg-[var(--blueprint-bg-2)] border border-red-400 px-3 py-2 text-sm focus:outline-none"
+              />
+              {errore && <p className="text-sm text-red-400 font-mono-cad">{errore}</p>}
+              <div className="flex gap-3">
+                <button
+                  type="submit"
+                  disabled={invio}
+                  className="font-mono-cad text-sm border border-red-400 text-red-400 px-4 py-2 hover:bg-red-400 hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40"
+                >
+                  {invio ? "INVIO..." : "APRI CONTESTAZIONE"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAzione("nessuna")}
+                  className="font-mono-cad text-sm text-[var(--blueprint-text-dim)] px-4 py-2"
+                >
+                  annulla
+                </button>
+              </div>
+            </form>
           )}
 
           {azione === "revisione" && (
@@ -416,7 +564,7 @@ export default function PannelloConsegna({
       {stato === "chiuso" && (
         <div className="space-y-3">
           <p className="text-sm text-[var(--blueprint-accent-strong)] font-mono-cad">
-            ✓ Lavoro chiuso e pagamento rilasciato al disegnatore.
+            ✓ Lavoro chiuso{contestazioneRisoltaIl ? " (contestazione risolta)" : " e pagamento rilasciato al disegnatore"}.
           </p>
           {(sonoAziendaProprietaria || sonoDisegnatoreAssegnato) && consegnaFile && (
             <div className="border border-[var(--blueprint-accent)] p-3 flex items-center justify-between gap-3">

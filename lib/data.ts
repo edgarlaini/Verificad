@@ -21,6 +21,16 @@ export interface Lavoro {
   dataConsegna?: string | null;
   motivoRevisione?: string | null;
   revisioniUsate: number;
+  pagamentoStato: "in_attesa" | "pagato" | "trasferito";
+  stripeCheckoutSessionId?: string | null;
+  stripePaymentIntentId?: string | null;
+  stripeTransferId?: string | null;
+  contestato: boolean;
+  contestazioneMotivo?: string | null;
+  contestazioneRispostaDisegnatore?: string | null;
+  contestazioneApertaIl?: string | null;
+  contestazioneRisoltaIl?: string | null;
+  percentualeRimborso?: number | null;
 }
 
 export interface Profilo {
@@ -33,6 +43,8 @@ export interface Profilo {
   percentualeRivalsa: number;
   aliquotaIva: number;
   percentualeRitenuta: number;
+  stripeAccountId: string | null;
+  stripeOnboardingCompletato: boolean;
 }
 
 export const PROGRAMMI_CAD_DISPONIBILI = [
@@ -81,6 +93,10 @@ function scadenzaSuperata(dataConsegna: string): boolean {
 }
 
 async function applicaApprovazioneAutomatica(lavoro: Lavoro): Promise<Lavoro> {
+  // Una contestazione aperta congela il rilascio automatico: il timer non
+  // riparte finché VerifiCAD non la risolve manualmente.
+  if (lavoro.contestato && !lavoro.contestazioneRisoltaIl) return lavoro;
+
   if (lavoro.stato === "in_revisione" && lavoro.dataConsegna) {
     if (scadenzaSuperata(lavoro.dataConsegna)) {
       await supabase.from("lavori").update({ stato: "chiuso" }).eq("id", lavoro.id);
@@ -181,6 +197,8 @@ export async function getProfilo(utenteId: string): Promise<Profilo> {
       percentualeRivalsa: 4,
       aliquotaIva: 22,
       percentualeRitenuta: 20,
+      stripeAccountId: null,
+      stripeOnboardingCompletato: false,
     };
   }
 
@@ -194,6 +212,8 @@ export async function getProfilo(utenteId: string): Promise<Profilo> {
     percentualeRivalsa: data.percentualeRivalsa ?? 4,
     aliquotaIva: data.aliquotaIva ?? 22,
     percentualeRitenuta: data.percentualeRitenuta ?? 20,
+    stripeAccountId: data.stripeAccountId ?? null,
+    stripeOnboardingCompletato: data.stripeOnboardingCompletato ?? false,
   };
 }
 
@@ -335,6 +355,107 @@ export async function consegnaLavoro(input: {
 
 export async function approvaLavoro(lavoroId: string): Promise<void> {
   await supabase.from("lavori").update({ stato: "chiuso" }).eq("id", lavoroId);
+}
+
+export async function registraCheckoutLavoro(lavoroId: string, sessionId: string): Promise<void> {
+  await supabase.from("lavori").update({ stripeCheckoutSessionId: sessionId }).eq("id", lavoroId);
+}
+
+export async function confermaPagamentoLavoro(
+  lavoroId: string,
+  paymentIntentId: string
+): Promise<void> {
+  await supabase
+    .from("lavori")
+    .update({ pagamentoStato: "pagato", stripePaymentIntentId: paymentIntentId })
+    .eq("id", lavoroId);
+}
+
+export async function registraTrasferimentoLavoro(lavoroId: string, transferId: string): Promise<void> {
+  await supabase
+    .from("lavori")
+    .update({ pagamentoStato: "trasferito", stripeTransferId: transferId })
+    .eq("id", lavoroId);
+}
+
+// L'azienda apre una contestazione formale su un lavoro consegnato ma non
+// accettabile — diversa dalla revisione ordinaria: congela il rilascio
+// automatico dei 30 giorni finché VerifiCAD non decide.
+export async function apriContestazione(lavoroId: string, motivo: string): Promise<void> {
+  await supabase
+    .from("lavori")
+    .update({
+      contestato: true,
+      contestazioneMotivo: motivo,
+      contestazioneApertaIl: new Date().toISOString(),
+    })
+    .eq("id", lavoroId);
+}
+
+// Il disegnatore assegnato può rispondere con la propria versione prima
+// che VerifiCAD decida.
+export async function rispondiContestazione(lavoroId: string, risposta: string): Promise<void> {
+  await supabase
+    .from("lavori")
+    .update({ contestazioneRispostaDisegnatore: risposta })
+    .eq("id", lavoroId);
+}
+
+export interface ContestazioneAperta {
+  id: string;
+  titolo: string;
+  azienda: string;
+  disegnatoreAssegnato: string | null;
+  budget: number;
+  contestazioneMotivo: string | null;
+  contestazioneRispostaDisegnatore: string | null;
+  contestazioneApertaIl: string | null;
+}
+
+export async function getContestazioniAperte(): Promise<ContestazioneAperta[]> {
+  const { data, error } = await supabase
+    .from("lavori")
+    .select("id, titolo, azienda, disegnatoreAssegnato, budget, contestazioneMotivo, contestazioneRispostaDisegnatore, contestazioneApertaIl")
+    .eq("contestato", true)
+    .is("contestazioneRisoltaIl", null)
+    .order("contestazioneApertaIl", { ascending: true });
+  if (error || !data) return [];
+  return data as ContestazioneAperta[];
+}
+
+// Chiude una contestazione: registra la percentuale rimborsata all'azienda
+// (0 = respinta, 100 = rimborso pieno) e chiude il lavoro. Lo split
+// economico vero e proprio (rimborso Stripe + trasferimento parziale al
+// disegnatore) lo fa lib/pagamenti.ts PRIMA di chiamare questa funzione.
+export async function segnaContestazioneRisolta(
+  lavoroId: string,
+  percentualeRimborso: number
+): Promise<void> {
+  await supabase
+    .from("lavori")
+    .update({
+      contestazioneRisoltaIl: new Date().toISOString(),
+      percentualeRimborso,
+      stato: "chiuso",
+    })
+    .eq("id", lavoroId);
+}
+
+export async function salvaStripeAccountId(utenteId: string, stripeAccountId: string): Promise<void> {
+  await supabase.from("profili").upsert(
+    { utenteId, stripeAccountId, aggiornatoIl: new Date().toISOString() },
+    { onConflict: "utenteId" }
+  );
+}
+
+export async function impostaOnboardingCompletato(
+  utenteId: string,
+  completato: boolean
+): Promise<void> {
+  await supabase
+    .from("profili")
+    .update({ stripeOnboardingCompletato: completato })
+    .eq("utenteId", utenteId);
 }
 
 export interface Revisione {

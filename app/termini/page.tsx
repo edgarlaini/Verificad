@@ -8,7 +8,7 @@ export default function TerminiPage() {
       </p>
       <h1 className="text-2xl font-semibold mb-2">Termini di Servizio</h1>
       <p className="text-[var(--blueprint-text-dim)] text-sm mb-10">
-        Ultimo aggiornamento: 20 agosto 2026 — LAINI STUDIO 3D di Edgar Laini, titolare della piattaforma VerifiCAD.
+        Ultimo aggiornamento: 20 agosto 2026 (rev. 2 — aggiunto art. 5, controversie e rimborsi) — LAINI STUDIO 3D di Edgar Laini, titolare della piattaforma VerifiCAD.
       </p>
 
       <div className="space-y-8 text-sm leading-relaxed text-[var(--blueprint-text-dim)]">
@@ -64,7 +64,27 @@ export default function TerminiPage() {
 
         <section>
           <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
-            5. UTILIZZO ESCLUSIVO DELLA PIATTAFORMA
+            5. CONTROVERSIE E RIMBORSI
+          </h2>
+          <p>
+            Se, dopo la consegna, l&apos;Azienda ritiene il lavoro gravemente non conforme al disegno tecnico
+            fornito e la revisione ordinaria di cui all&apos;art. 4 non è ritenuta sufficiente, può aprire una
+            contestazione formale attraverso la piattaforma, indicandone il motivo. Il Disegnatore ha facoltà di
+            rispondere con la propria versione dei fatti prima che la contestazione venga esaminata.
+          </p>
+          <p className="mt-3">
+            L&apos;apertura di una contestazione sospende il rilascio automatico del pagamento di cui all&apos;art.
+            3 fino alla sua risoluzione. VerifiCAD esamina gli elementi forniti da entrambe le parti e decide, a
+            propria ragionevole discrezione, la ripartizione tra l&apos;importo da restituire all&apos;Azienda e
+            quello da corrispondere al Disegnatore. Tale decisione non implica che VerifiCAD assuma la qualità di
+            parte del contratto d&apos;opera tra Azienda e Disegnatore, di cui resta estranea ai sensi dell&apos;art.
+            2, ma costituisce un servizio di garanzia offerto agli utenti della piattaforma.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            6. UTILIZZO ESCLUSIVO DELLA PIATTAFORMA
           </h2>
           <p>
             Azienda e Disegnatore si impegnano a condurre attraverso VerifiCAD ogni comunicazione, pagamento e
@@ -76,7 +96,7 @@ export default function TerminiPage() {
 
         <section>
           <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
-            6. CLAUSOLA DI NON DISINTERMEDIAZIONE
+            7. CLAUSOLA DI NON DISINTERMEDIAZIONE
           </h2>
           <p>
             Per un periodo di 24 (ventiquattro) mesi decorrenti dal primo contatto avvenuto tramite VerifiCAD tra
@@ -96,7 +116,7 @@ export default function TerminiPage() {
 
         <section>
           <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
-            7. PROPRIETÀ DEI FILE E DEI MODELLI
+            8. PROPRIETÀ DEI FILE E DEI MODELLI
           </h2>
           <p>
             Salvo diverso accordo tra le parti, i diritti sul modello 3D consegnato si trasferiscono all&apos;Azienda
@@ -108,7 +128,7 @@ export default function TerminiPage() {
 
         <section>
           <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
-            8. LIMITAZIONE DI RESPONSABILITÀ
+            9. LIMITAZIONE DI RESPONSABILITÀ
           </h2>
           <p>
             VerifiCAD si impegna a mantenere il servizio operativo, ma non può garantire l&apos;assenza totale di
@@ -121,7 +141,7 @@ export default function TerminiPage() {
 
         <section>
           <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
-            9. RECESSO E SOSPENSIONE DELL&apos;ACCOUNT
+            10. RECESSO E SOSPENSIONE DELL&apos;ACCOUNT
           </h2>
           <p>
             Ciascuna parte può chiudere il proprio account in qualsiasi momento. LAINI STUDIO 3D si riserva il
@@ -132,7 +152,7 @@ export default function TerminiPage() {
 
         <section>
           <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
-            10. LEGGE APPLICABILE E FORO COMPETENTE
+            11. LEGGE APPLICABILE E FORO COMPETENTE
           </h2>
           <p>
             I presenti Termini sono regolati dalla legge italiana. Per ogni controversia è competente in via
@@ -142,7 +162,7 @@ export default function TerminiPage() {
 
         <section>
           <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
-            11. CONTATTI
+            12. CONTATTI
           </h2>
           <p>
             Per qualsiasi domanda sui presenti Termini: edgar.laini@gmail.com — LAINI STUDIO 3D di Edgar Laini,
