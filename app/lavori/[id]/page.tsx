@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
-import { getLavoro, statoLabel, giorniRimanentiRevisione, getRevisioniLavoro } from "@/lib/data";
-import { calcolaCommissione } from "@/lib/calc";
+import { getLavoro, statoLabel, giorniRimanentiRevisione, getRevisioniLavoro, getProfilo } from "@/lib/data";
+import { calcolaImportiLavoro, RegimeFiscale } from "@/lib/fiscale";
 import { getUtenteCorrente } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import PannelloCandidature from "@/components/PannelloCandidature";
@@ -17,7 +17,17 @@ export default async function DettaglioLavoro({
   const lavoro = await getLavoro(id);
   if (!lavoro) notFound();
 
-  const split = calcolaCommissione(lavoro.budget);
+  let regimeDisegnatore: RegimeFiscale | null = null;
+  if (lavoro.disegnatoreUtenteId) {
+    const profiloDisegnatore = await getProfilo(lavoro.disegnatoreUtenteId);
+    regimeDisegnatore = {
+      regimeFiscale: profiloDisegnatore.regimeFiscale,
+      percentualeRivalsa: profiloDisegnatore.percentualeRivalsa,
+      aliquotaIva: profiloDisegnatore.aliquotaIva,
+      percentualeRitenuta: profiloDisegnatore.percentualeRitenuta,
+    };
+  }
+  const importi = calcolaImportiLavoro(lavoro.budget, regimeDisegnatore);
   const revisioni = await getRevisioniLavoro(id);
   const utente = await getUtenteCorrente();
 
@@ -67,34 +77,43 @@ export default async function DettaglioLavoro({
         <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] mb-4">
           RIPARTIZIONE PAGAMENTO
         </h2>
+        {importi.stima && (
+          <p className="text-xs text-[var(--blueprint-amber)] font-mono-cad mb-4">
+            stima — l&apos;importo esatto si conferma dopo l&apos;assegnazione del disegnatore, in base al suo regime fiscale
+          </p>
+        )}
         <dl className="space-y-3 text-sm font-mono-cad">
           <div className="flex justify-between">
-            <dt className="text-[var(--blueprint-text-dim)]">valore lavoro</dt>
+            <dt className="text-[var(--blueprint-text-dim)]">valore lavoro pubblicato</dt>
             <dd>€{lavoro.budget.toFixed(2)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-[var(--blueprint-text-dim)]">+ commissione azienda (10%)</dt>
-            <dd>€{split.commissioneAzienda.toFixed(2)}</dd>
+            <dt className="text-[var(--blueprint-text-dim)]">fattura disegnatore (netto)</dt>
+            <dd>€{importi.fatturaDisegnatore.netto.toFixed(2)}</dd>
+          </div>
+          <div className="flex justify-between">
+            <dt className="text-[var(--blueprint-text-dim)]">+ commissione VerifiCAD azienda (netto)</dt>
+            <dd>€{importi.commissioneAzienda.netto.toFixed(2)}</dd>
           </div>
           <div className="flex justify-between border-t border-[var(--blueprint-line)] pt-3">
-            <dt>totale addebitato all&apos;azienda</dt>
+            <dt>totale da versare dall&apos;azienda</dt>
             <dd className="text-[var(--blueprint-accent-strong)]">
-              €{split.totalePagatoAzienda.toFixed(2)}
+              €{importi.totaleDaVersareAzienda.toFixed(2)}
             </dd>
           </div>
           <div className="flex justify-between pt-3">
-            <dt className="text-[var(--blueprint-text-dim)]">− commissione disegnatore (10%)</dt>
-            <dd>−€{split.commissioneDisegnatore.toFixed(2)}</dd>
+            <dt className="text-[var(--blueprint-text-dim)]">− commissione VerifiCAD disegnatore (netto)</dt>
+            <dd>−€{importi.commissioneDisegnatore.netto.toFixed(2)}</dd>
           </div>
           <div className="flex justify-between border-t border-[var(--blueprint-line)] pt-3">
             <dt>netto al disegnatore</dt>
             <dd className="text-[var(--blueprint-amber)]">
-              €{split.nettoDisegnatore.toFixed(2)}
+              €{importi.nettoFinaleDisegnatore.toFixed(2)}
             </dd>
           </div>
         </dl>
         <p className="text-xs text-[var(--blueprint-text-dim)] mt-4">
-          fondi bloccati in escrow fino ad approvazione consegna, o rilascio automatico dopo 30 giorni. Includono 3 revisioni gratuite.
+          fondi bloccati in escrow fino ad approvazione consegna, o rilascio automatico dopo 30 giorni. Includono 3 revisioni gratuite. Il disegnatore fattura il valore del lavoro direttamente all&apos;azienda secondo il proprio regime fiscale; VerifiCAD fattura solo le due commissioni.
         </p>
       </div>
 

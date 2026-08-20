@@ -29,6 +29,10 @@ export interface Profilo {
   programmiCad: string[];
   cvUrl: string | null;
   cvNome: string | null;
+  regimeFiscale: "forfettario" | "ordinario";
+  percentualeRivalsa: number;
+  aliquotaIva: number;
+  percentualeRitenuta: number;
 }
 
 export const PROGRAMMI_CAD_DISPONIBILI = [
@@ -167,7 +171,17 @@ export async function getProfilo(utenteId: string): Promise<Profilo> {
     .maybeSingle();
 
   if (!data) {
-    return { utenteId, competenze: "", programmiCad: [], cvUrl: null, cvNome: null };
+    return {
+      utenteId,
+      competenze: "",
+      programmiCad: [],
+      cvUrl: null,
+      cvNome: null,
+      regimeFiscale: "forfettario",
+      percentualeRivalsa: 4,
+      aliquotaIva: 22,
+      percentualeRitenuta: 20,
+    };
   }
 
   return {
@@ -176,6 +190,10 @@ export async function getProfilo(utenteId: string): Promise<Profilo> {
     programmiCad: data.programmiCad ? data.programmiCad.split(",").filter(Boolean) : [],
     cvUrl: data.cvUrl ?? null,
     cvNome: data.cvNome ?? null,
+    regimeFiscale: data.regimeFiscale === "ordinario" ? "ordinario" : "forfettario",
+    percentualeRivalsa: data.percentualeRivalsa ?? 4,
+    aliquotaIva: data.aliquotaIva ?? 22,
+    percentualeRitenuta: data.percentualeRitenuta ?? 20,
   };
 }
 
@@ -183,12 +201,20 @@ export async function salvaProfilo(input: {
   utenteId: string;
   competenze: string;
   programmiCad: string[];
+  regimeFiscale: "forfettario" | "ordinario";
+  percentualeRivalsa: number;
+  aliquotaIva: number;
+  percentualeRitenuta: number;
 }): Promise<void> {
   await supabase.from("profili").upsert(
     {
       utenteId: input.utenteId,
       competenze: input.competenze,
       programmiCad: input.programmiCad.join(","),
+      regimeFiscale: input.regimeFiscale,
+      percentualeRivalsa: input.percentualeRivalsa,
+      aliquotaIva: input.aliquotaIva,
+      percentualeRitenuta: input.percentualeRitenuta,
       aggiornatoIl: new Date().toISOString(),
     },
     { onConflict: "utenteId" }

@@ -26,6 +26,10 @@ interface Profilo {
   programmiCad: string[];
   cvUrl: string | null;
   cvNome: string | null;
+  regimeFiscale: "forfettario" | "ordinario";
+  percentualeRivalsa: number;
+  aliquotaIva: number;
+  percentualeRitenuta: number;
 }
 
 export default function ProfiloPage() {
@@ -35,6 +39,10 @@ export default function ProfiloPage() {
   const [programmiCad, setProgrammiCad] = useState<string[]>([]);
   const [cvUrl, setCvUrl] = useState<string | null>(null);
   const [cvNome, setCvNome] = useState<string | null>(null);
+  const [regimeFiscale, setRegimeFiscale] = useState<"forfettario" | "ordinario">("forfettario");
+  const [percentualeRivalsa, setPercentualeRivalsa] = useState(4);
+  const [aliquotaIva, setAliquotaIva] = useState(22);
+  const [percentualeRitenuta, setPercentualeRitenuta] = useState(20);
   const [caricamento, setCaricamento] = useState(true);
   const [salvataggio, setSalvataggio] = useState(false);
   const [uploadCv, setUploadCv] = useState(false);
@@ -58,6 +66,10 @@ export default function ProfiloPage() {
             setProgrammiCad(p.programmiCad);
             setCvUrl(p.cvUrl);
             setCvNome(p.cvNome);
+            setRegimeFiscale(p.regimeFiscale ?? "forfettario");
+            setPercentualeRivalsa(p.percentualeRivalsa ?? 4);
+            setAliquotaIva(p.aliquotaIva ?? 22);
+            setPercentualeRitenuta(p.percentualeRitenuta ?? 20);
           });
       })
       .finally(() => setCaricamento(false));
@@ -76,7 +88,14 @@ export default function ProfiloPage() {
     const res = await fetch("/api/profilo", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ competenze, programmiCad }),
+      body: JSON.stringify({
+        competenze,
+        programmiCad,
+        regimeFiscale,
+        percentualeRivalsa,
+        aliquotaIva,
+        percentualeRitenuta,
+      }),
     });
     setSalvataggio(false);
     if (!res.ok) {
@@ -207,6 +226,84 @@ export default function ProfiloPage() {
             </a>
           )}
         </div>
+
+        {utente.ruolo === "disegnatore" && (
+          <div>
+            <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-2">
+              REGIME FISCALE
+            </label>
+            <p className="text-xs text-[var(--blueprint-text-dim)] mb-3">
+              Serve per calcolare l&apos;importo esatto che l&apos;azienda deve versare quando ti viene assegnato un lavoro — fatturi tu direttamente all&apos;azienda, secondo il tuo regime.
+            </p>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              {(["forfettario", "ordinario"] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRegimeFiscale(r)}
+                  className={`font-mono-cad text-sm py-2 px-3 border transition-colors ${
+                    regimeFiscale === r
+                      ? "border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] bg-[var(--blueprint-bg-2)]"
+                      : "border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)]"
+                  }`}
+                >
+                  {regimeFiscale === r ? "✓ " : ""}
+                  {r === "forfettario" ? "Forfettario" : "Ordinario"}
+                </button>
+              ))}
+            </div>
+
+            {regimeFiscale === "ordinario" && (
+              <div className="grid grid-cols-3 gap-3 border border-[var(--blueprint-line)] p-4">
+                <div>
+                  <label className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] block mb-1">
+                    RIVALSA CASSA %
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.5}
+                    value={percentualeRivalsa}
+                    onChange={(e) => setPercentualeRivalsa(parseFloat(e.target.value) || 0)}
+                    className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-2 py-1.5 text-sm font-mono-cad focus:outline-none focus:border-[var(--blueprint-accent)]"
+                  />
+                </div>
+                <div>
+                  <label className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] block mb-1">
+                    IVA %
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.5}
+                    value={aliquotaIva}
+                    onChange={(e) => setAliquotaIva(parseFloat(e.target.value) || 0)}
+                    className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-2 py-1.5 text-sm font-mono-cad focus:outline-none focus:border-[var(--blueprint-accent)]"
+                  />
+                </div>
+                <div>
+                  <label className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] block mb-1">
+                    RITENUTA %
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.5}
+                    value={percentualeRitenuta}
+                    onChange={(e) => setPercentualeRitenuta(parseFloat(e.target.value) || 0)}
+                    className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-2 py-1.5 text-sm font-mono-cad focus:outline-none focus:border-[var(--blueprint-accent)]"
+                  />
+                </div>
+                <p className="col-span-3 text-[11px] text-[var(--blueprint-text-dim)] mt-1">
+                  Valori standard per un professionista con Gestione Separata INPS: 4% / 22% / 20%. Se hai una cassa diversa (es. Inarcassa), modifica pure.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {errore && <p className="text-sm text-red-400 font-mono-cad">{errore}</p>}
         {messaggio && <p className="text-sm text-[var(--blueprint-accent-strong)] font-mono-cad">{messaggio}</p>}
