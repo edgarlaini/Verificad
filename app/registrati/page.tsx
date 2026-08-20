@@ -148,8 +148,7 @@ export default function Registrati() {
             />
             <span className="text-xs text-[var(--blueprint-text-dim)] leading-relaxed">
               Dichiaro di approvare specificamente, ai sensi degli artt. 1341 e 1342 c.c., le
-              clausole di cui agli artt. 6 (non disintermediazione e penale) e 8 (limitazione di
-              responsabilità) dei{" "}
+              clausole di cui agli artt. 6 e 8 dei{" "}
               <Link
                 href="/termini"
                 target="_blank"
