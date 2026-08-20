@@ -196,37 +196,6 @@ export default function ProfiloPage() {
           </div>
         </div>
 
-        <div>
-          <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-2">
-            CURRICULUM (PDF)
-          </label>
-          <div className="border border-dashed border-[var(--blueprint-line)] p-6 text-center">
-            <input
-              type="file"
-              id="cv"
-              accept="application/pdf"
-              className="hidden"
-              onChange={caricaCv}
-            />
-            <label
-              htmlFor="cv"
-              className="cursor-pointer font-mono-cad text-sm text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]"
-            >
-              {uploadCv ? "caricamento..." : cvNome ? `⌗ ${cvNome} — sostituisci` : "+ carica CV in PDF"}
-            </label>
-          </div>
-          {cvUrl && (
-            <a
-              href={cvUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block mt-2 text-xs font-mono-cad text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]"
-            >
-              apri CV caricato →
-            </a>
-          )}
-        </div>
-
         {utente.ruolo === "disegnatore" && (
           <div>
             <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-2">
@@ -305,6 +274,36 @@ export default function ProfiloPage() {
           </div>
         )}
 
+        <div>
+          <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-2">
+            CURRICULUM (PDF)
+          </label>
+          <div className="border border-dashed border-[var(--blueprint-line)] p-6 text-center">
+            <input
+              type="file"
+              id="cv"
+              accept="application/pdf"
+              className="hidden"
+              onChange={caricaCv}
+            />
+            <label
+              htmlFor="cv"
+              className="cursor-pointer font-mono-cad text-sm text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]"
+            >
+              {uploadCv ? "caricamento..." : cvNome ? `⌗ ${cvNome} — sostituisci` : "+ carica CV in PDF"}
+            </label>
+          </div>
+          {cvUrl && (
+            <a
+              href={cvUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-2 text-xs font-mono-cad text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)]"
+            >
+              apri CV caricato →
+            </a>
+          )}
+        </div>
         {errore && <p className="text-sm text-red-400 font-mono-cad">{errore}</p>}
         {messaggio && <p className="text-sm text-[var(--blueprint-accent-strong)] font-mono-cad">{messaggio}</p>}
 
