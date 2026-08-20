@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { registraUtente, creaSessione, impostaCookieSessione } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
-  const { email, password, ruolo, nome } = await req.json();
+  const { email, password, ruolo, nome, accettaTermini, accettaClausoleSpecifiche } =
+    await req.json();
 
   if (!email || !password || !ruolo || !nome) {
     return NextResponse.json({ error: "Tutti i campi sono obbligatori." }, { status: 400 });
@@ -16,15 +17,27 @@ export async function POST(req: NextRequest) {
   if (ruolo !== "azienda" && ruolo !== "disegnatore") {
     return NextResponse.json({ error: "Ruolo non valido." }, { status: 400 });
   }
+  if (accettaTermini !== true || accettaClausoleSpecifiche !== true) {
+    return NextResponse.json(
+      { error: "Devi accettare i Termini di Servizio e le clausole specifiche per registrarti." },
+      { status: 400 }
+    );
+  }
 
   const baseUrl = req.nextUrl.origin;
-  const risultato = await registraUtente({ email, password, ruolo, nome, baseUrl });
+  const risultato = await registraUtente({
+    email,
+    password,
+    ruolo,
+    nome,
+    baseUrl,
+    accettaTermini,
+    accettaClausoleSpecifiche,
+  });
   if (!risultato.ok) {
     return NextResponse.json({ error: risultato.errore }, { status: 400 });
   }
-
   const token = await creaSessione(risultato.utente.id);
   await impostaCookieSessione(token);
-
   return NextResponse.json({ utente: risultato.utente });
 }

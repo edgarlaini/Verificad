@@ -9,10 +9,18 @@ export default function Registrati() {
   const [ruolo, setRuolo] = useState<Ruolo>("azienda");
   const [errore, setErrore] = useState("");
   const [invio, setInvio] = useState(false);
+  const [accettaTermini, setAccettaTermini] = useState(false);
+  const [accettaClausoleSpecifiche, setAccettaClausoleSpecifiche] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setErrore("");
+
+    if (!accettaTermini || !accettaClausoleSpecifiche) {
+      setErrore("Devi spuntare entrambe le caselle sui Termini di Servizio per creare l'account.");
+      return;
+    }
+
     setInvio(true);
     const form = new FormData(e.currentTarget);
 
@@ -24,6 +32,11 @@ export default function Registrati() {
         password: form.get("password"),
         nome: form.get("nome"),
         ruolo,
+        // Il backend può ignorare questi due campi se non ancora predisposto a
+        // registrarli; idealmente andrebbero salvati con data/ora sull'utente
+        // come prova dell'accettazione (vedi nota consegnata a Edgar).
+        accettaTermini,
+        accettaClausoleSpecifiche,
       }),
     });
 
@@ -103,6 +116,50 @@ export default function Registrati() {
             minLength={6}
             className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-3 py-2 text-sm focus:outline-none focus:border-[var(--blueprint-accent)]"
           />
+        </div>
+
+        <div className="space-y-3 border border-[var(--blueprint-line)] p-4">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={accettaTermini}
+              onChange={(e) => setAccettaTermini(e.target.checked)}
+              className="mt-0.5 accent-[var(--blueprint-accent)]"
+            />
+            <span className="text-xs text-[var(--blueprint-text-dim)] leading-relaxed">
+              Ho letto e accetto i{" "}
+              <Link
+                href="/termini"
+                target="_blank"
+                className="text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)] underline"
+              >
+                Termini di Servizio
+              </Link>{" "}
+              di VerifiCAD.
+            </span>
+          </label>
+
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={accettaClausoleSpecifiche}
+              onChange={(e) => setAccettaClausoleSpecifiche(e.target.checked)}
+              className="mt-0.5 accent-[var(--blueprint-accent)]"
+            />
+            <span className="text-xs text-[var(--blueprint-text-dim)] leading-relaxed">
+              Dichiaro di approvare specificamente, ai sensi degli artt. 1341 e 1342 c.c., le
+              clausole di cui agli artt. 6 (non disintermediazione e penale) e 8 (limitazione di
+              responsabilità) dei{" "}
+              <Link
+                href="/termini"
+                target="_blank"
+                className="text-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)] underline"
+              >
+                Termini di Servizio
+              </Link>
+              .
+            </span>
+          </label>
         </div>
 
         {errore && <p className="text-sm text-red-400 font-mono-cad">{errore}</p>}

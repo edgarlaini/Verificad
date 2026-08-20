@@ -15,13 +15,26 @@ export interface Utente {
 
 const COOKIE_NAME = "cadconnect_sessione";
 
+// Data di ultimo aggiornamento sostanziale della pagina /termini — tenuta qui
+// per essere registrata insieme all'accettazione di ogni nuovo utente.
+export const VERSIONE_TERMINI_CORRENTE = "2026-08-20";
+
 export async function registraUtente(input: {
   email: string;
   password: string;
   ruolo: Ruolo;
   nome: string;
   baseUrl: string;
+  accettaTermini: boolean;
+  accettaClausoleSpecifiche: boolean;
 }): Promise<{ ok: true; utente: Utente } | { ok: false; errore: string }> {
+  if (!input.accettaTermini || !input.accettaClausoleSpecifiche) {
+    return {
+      ok: false,
+      errore: "Devi accettare i Termini di Servizio e le clausole specifiche per registrarti.",
+    };
+  }
+
   const emailLower = input.email.toLowerCase();
   const { data: esistente } = await supabase
     .from("utenti")
@@ -31,11 +44,9 @@ export async function registraUtente(input: {
   if (esistente) {
     return { ok: false, errore: "Esiste già un account con questa email." };
   }
-
   const id = "u" + crypto.randomUUID();
   const passwordHash = await bcrypt.hash(input.password, 10);
   const tokenVerifica = crypto.randomBytes(24).toString("hex");
-
   const { error } = await supabase.from("utenti").insert({
     id,
     email: emailLower,
@@ -44,12 +55,13 @@ export async function registraUtente(input: {
     nome: input.nome,
     emailVerificata: false,
     tokenVerifica,
+    terminiAccettatiIl: new Date().toISOString(),
+    versioneTermini: VERSIONE_TERMINI_CORRENTE,
+    accettazioneClausoleSpecifiche: true,
   });
   if (error) return { ok: false, errore: "Errore nella registrazione." };
-
   const link = `${input.baseUrl}/api/auth/verifica-email?token=${tokenVerifica}`;
   await inviaEmailVerifica(emailLower, input.nome, link);
-
   return { ok: true, utente: { id, email: emailLower, ruolo: input.ruolo, nome: input.nome } };
 }
 
@@ -62,12 +74,9 @@ export async function autenticaUtente(
     .select("*")
     .eq("email", email.toLowerCase())
     .maybeSingle();
-
   if (!riga) return { ok: false, errore: "Email o password non corretti." };
-
   const valida = await bcrypt.compare(password, riga.passwordHash);
   if (!valida) return { ok: false, errore: "Email o password non corretti." };
-
   return {
     ok: true,
     utente: { id: riga.id, email: riga.email, ruolo: riga.ruolo, nome: riga.nome },
@@ -103,19 +112,16 @@ export async function getUtenteCorrente(): Promise<Utente | null> {
   const store = await cookies();
   const token = store.get(COOKIE_NAME)?.value;
   if (!token) return null;
-
   const { data: sessione } = await supabase
     .from("sessioni")
     .select("utenteId")
     .eq("token", token)
     .maybeSingle();
   if (!sessione) return null;
-
   const { data: utente } = await supabase
     .from("utenti")
     .select("id, email, ruolo, nome")
     .eq("id", sessione.utenteId)
     .maybeSingle();
-
   return (utente as Utente) ?? null;
 }
