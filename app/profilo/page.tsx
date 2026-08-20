@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -33,7 +33,7 @@ interface Profilo {
   stripeOnboardingCompletato: boolean;
 }
 
-export default function ProfiloPage() {
+function ProfiloContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [utente, setUtente] = useState<Utente | null | undefined>(undefined);
@@ -380,5 +380,13 @@ export default function ProfiloPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+export default function ProfiloPage() {
+  return (
+    <Suspense fallback={null}>
+      <ProfiloContent />
+    </Suspense>
   );
 }
