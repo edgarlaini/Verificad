@@ -111,9 +111,10 @@ export default function TerminiPage() {
             8. LIMITAZIONE DI RESPONSABILITÀ
           </h2>
           <p>
-            VerifiCAD non garantisce la disponibilità continuativa del servizio e non risponde di danni derivanti
-            da malfunzionamenti, interruzioni o ritardi nei pagamenti dovuti a terze parti (istituti di pagamento,
-            servizi di hosting). La responsabilità di VerifiCAD, ove sussistente, è in ogni caso limitata
+            VerifiCAD si impegna a mantenere il servizio operativo, ma non può garantire l&apos;assenza totale di
+            interruzioni tecniche occasionali (manutenzione, malfunzionamenti di terze parti come istituti di
+            pagamento o servizi di hosting) e non risponde dei danni da esse derivanti. Salvi i casi di dolo o
+            colpa grave di VerifiCAD, la responsabilità di VerifiCAD, ove sussistente, è in ogni caso limitata
             all&apos;importo delle commissioni percepite sul singolo lavoro contestato.
           </p>
         </section>
