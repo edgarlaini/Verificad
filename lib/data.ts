@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { inviaEmailAssegnazione } from "./email";
 
 export type StatoLavoro = "aperto" | "in_corso" | "in_revisione" | "chiuso";
 
@@ -54,6 +55,11 @@ export interface Candidatura {
 const GIORNI_APPROVAZIONE_AUTOMATICA = 30;
 export const REVISIONI_INCLUSE = 3;
 export const PERCENTUALE_EXTRA_REVISIONE = 0.2;
+
+// Base del sito usata per costruire link cliccabili nelle email (es. notifica
+// assegnazione lavoro). Quando colleghi un dominio tuo (es. verificad.it),
+// aggiorna questo valore o imposta la variabile d'ambiente NEXT_PUBLIC_SITE_URL su Vercel.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://verificad-yaxu.vercel.app";
 
 export function calcolaExtraRevisione(budget: number) {
   const totale = Math.round(budget * PERCENTUALE_EXTRA_REVISIONE * 100) / 100;
@@ -261,6 +267,21 @@ export async function accettaCandidatura(candidaturaId: string): Promise<void> {
       disegnatoreUtenteId: cand.disegnatoreUtenteId,
     })
     .eq("id", cand.lavoroId);
+
+  // Notifica email al disegnatore assegnato — non blocca né fa fallire
+  // l'assegnazione del lavoro se l'invio dovesse avere problemi.
+  try {
+    const [{ data: lavoro }, { data: disegnatore }] = await Promise.all([
+      supabase.from("lavori").select("titolo").eq("id", cand.lavoroId).single(),
+      supabase.from("utenti").select("email").eq("id", cand.disegnatoreUtenteId).single(),
+    ]);
+    if (lavoro && disegnatore?.email) {
+      const link = `${SITE_URL}/lavori/${cand.lavoroId}`;
+      await inviaEmailAssegnazione(disegnatore.email, cand.disegnatoreNome, lavoro.titolo, link);
+    }
+  } catch (err) {
+    console.error("Errore invio email di assegnazione lavoro:", err);
+  }
 }
 
 export async function consegnaLavoro(input: {
