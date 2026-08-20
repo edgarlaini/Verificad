@@ -50,34 +50,40 @@ export async function creaCheckoutCandidatura(input: {
   };
   const importi = calcolaImportiLavoro(lavoro.budget, regime);
 
-  const session = await stripe.checkout.sessions.create({
-    mode: "payment",
-    payment_method_types: ["card"],
-    line_items: [
-      {
-        price_data: {
-          currency: "eur",
-          unit_amount: centesimi(importi.totaleDaVersareAzienda),
-          product_data: {
-            name: `Pagamento lavoro: ${lavoro.titolo}`,
-            description: "Comprende il compenso del disegnatore e la commissione VerifiCAD.",
+  try {
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "eur",
+            unit_amount: centesimi(importi.totaleDaVersareAzienda),
+            product_data: {
+              name: `Pagamento lavoro: ${lavoro.titolo}`,
+              description: "Comprende il compenso del disegnatore e la commissione VerifiCAD.",
+            },
           },
+          quantity: 1,
         },
-        quantity: 1,
+      ],
+      metadata: {
+        candidaturaId: input.candidaturaId,
+        lavoroId: input.lavoroId,
       },
-    ],
-    metadata: {
-      candidaturaId: input.candidaturaId,
-      lavoroId: input.lavoroId,
-    },
-    success_url: `${input.baseUrl}/lavori/${input.lavoroId}?pagamento=ok`,
-    cancel_url: `${input.baseUrl}/lavori/${input.lavoroId}?pagamento=annullato`,
-  });
+      success_url: `${input.baseUrl}/lavori/${input.lavoroId}?pagamento=ok`,
+      cancel_url: `${input.baseUrl}/lavori/${input.lavoroId}?pagamento=annullato`,
+    });
 
-  await registraCheckoutLavoro(input.lavoroId, session.id);
+    await registraCheckoutLavoro(input.lavoroId, session.id);
 
-  if (!session.url) return { errore: "Stripe non ha restituito un link di pagamento." };
-  return { url: session.url };
+    if (!session.url) return { errore: "Stripe non ha restituito un link di pagamento." };
+    return { url: session.url };
+  } catch (err) {
+    console.error("Errore checkout Stripe:", err);
+    const messaggio = err instanceof Error ? err.message : "Errore sconosciuto.";
+    return { errore: `Errore Stripe: ${messaggio}` };
+  }
 }
 
 // Crea (se non esiste) il conto Stripe Express del disegnatore e restituisce
@@ -90,29 +96,35 @@ export async function creaOnboardingDisegnatore(input: {
   const stripe = getStripe();
   const profilo = await getProfilo(input.utenteId);
 
-  let accountId = profilo.stripeAccountId;
-  if (!accountId) {
-    const account = await stripe.accounts.create({
-      type: "express",
-      country: "IT",
-      email: input.email,
-      capabilities: {
-        transfers: { requested: true },
-      },
-      business_type: "individual",
+  try {
+    let accountId = profilo.stripeAccountId;
+    if (!accountId) {
+      const account = await stripe.accounts.create({
+        type: "express",
+        country: "IT",
+        email: input.email,
+        capabilities: {
+          transfers: { requested: true },
+        },
+        business_type: "individual",
+      });
+      accountId = account.id;
+      await salvaStripeAccountId(input.utenteId, accountId);
+    }
+
+    const link = await stripe.accountLinks.create({
+      account: accountId,
+      refresh_url: `${input.baseUrl}/profilo`,
+      return_url: `${input.baseUrl}/profilo?stripe=collegato`,
+      type: "account_onboarding",
     });
-    accountId = account.id;
-    await salvaStripeAccountId(input.utenteId, accountId);
+
+    return { url: link.url };
+  } catch (err) {
+    console.error("Errore onboarding Stripe:", err);
+    const messaggio = err instanceof Error ? err.message : "Errore sconosciuto.";
+    return { errore: `Errore Stripe: ${messaggio}` };
   }
-
-  const link = await stripe.accountLinks.create({
-    account: accountId,
-    refresh_url: `${input.baseUrl}/profilo`,
-    return_url: `${input.baseUrl}/profilo?stripe=collegato`,
-    type: "account_onboarding",
-  });
-
-  return { url: link.url };
 }
 
 // Trasferisce al disegnatore assegnato il netto che gli spetta, secondo il
