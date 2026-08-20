@@ -93,10 +93,10 @@ export async function creaOnboardingDisegnatore(input: {
   email: string;
   baseUrl: string;
 }): Promise<{ url: string } | { errore: string }> {
-  const stripe = getStripe();
-  const profilo = await getProfilo(input.utenteId);
-
   try {
+    const stripe = getStripe();
+    const profilo = await getProfilo(input.utenteId);
+
     let accountId = profilo.stripeAccountId;
     if (!accountId) {
       const account = await stripe.accounts.create({
