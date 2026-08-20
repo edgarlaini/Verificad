@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 const PROGRAMMI_CAD_DISPONIBILI = [
@@ -30,10 +30,12 @@ interface Profilo {
   percentualeRivalsa: number;
   aliquotaIva: number;
   percentualeRitenuta: number;
+  stripeOnboardingCompletato: boolean;
 }
 
 export default function ProfiloPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [utente, setUtente] = useState<Utente | null | undefined>(undefined);
   const [competenze, setCompetenze] = useState("");
   const [programmiCad, setProgrammiCad] = useState<string[]>([]);
@@ -43,6 +45,8 @@ export default function ProfiloPage() {
   const [percentualeRivalsa, setPercentualeRivalsa] = useState(4);
   const [aliquotaIva, setAliquotaIva] = useState(22);
   const [percentualeRitenuta, setPercentualeRitenuta] = useState(20);
+  const [stripeOnboardingCompletato, setStripeOnboardingCompletato] = useState(false);
+  const [collegandoStripe, setCollegandoStripe] = useState(false);
   const [caricamento, setCaricamento] = useState(true);
   const [salvataggio, setSalvataggio] = useState(false);
   const [uploadCv, setUploadCv] = useState(false);
@@ -70,10 +74,30 @@ export default function ProfiloPage() {
             setPercentualeRivalsa(p.percentualeRivalsa ?? 4);
             setAliquotaIva(p.aliquotaIva ?? 22);
             setPercentualeRitenuta(p.percentualeRitenuta ?? 20);
+            setStripeOnboardingCompletato(p.stripeOnboardingCompletato ?? false);
           });
       })
       .finally(() => setCaricamento(false));
   }, [router]);
+
+  useEffect(() => {
+    if (searchParams.get("stripe") === "collegato") {
+      setMessaggio("Collegamento a Stripe avviato — potrebbero volerci alcuni minuti prima che risulti attivo.");
+    }
+  }, [searchParams]);
+
+  async function collegaStripe() {
+    setCollegandoStripe(true);
+    setErrore("");
+    const res = await fetch("/api/profilo/stripe-onboarding", { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    setCollegandoStripe(false);
+    if (!res.ok) {
+      setErrore(data.error || "Errore nel collegamento a Stripe.");
+      return;
+    }
+    if (data.url) window.location.href = data.url;
+  }
 
   function toggleProgramma(programma: string) {
     setProgrammiCad((prev) =>
@@ -271,6 +295,40 @@ export default function ProfiloPage() {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {utente.ruolo === "disegnatore" && (
+          <div>
+            <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-2">
+              PAGAMENTI
+            </label>
+            <p className="text-xs text-[var(--blueprint-text-dim)] mb-3">
+              Collega il tuo conto Stripe per poter ricevere i pagamenti dei lavori assegnati. Senza questo passaggio, le aziende non potranno pagarti tramite la piattaforma.
+            </p>
+            <div className="border border-[var(--blueprint-line)] p-4 flex items-center justify-between gap-4">
+              <span
+                className={`font-mono-cad text-xs ${
+                  stripeOnboardingCompletato
+                    ? "text-[var(--blueprint-accent-strong)]"
+                    : "text-[var(--blueprint-text-dim)]"
+                }`}
+              >
+                {stripeOnboardingCompletato ? "✓ Stripe collegato" : "Stripe non ancora collegato"}
+              </span>
+              <button
+                type="button"
+                onClick={collegaStripe}
+                disabled={collegandoStripe}
+                className="shrink-0 font-mono-cad text-xs border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40"
+              >
+                {collegandoStripe
+                  ? "reindirizzamento..."
+                  : stripeOnboardingCompletato
+                  ? "aggiorna dati Stripe"
+                  : "collega Stripe →"}
+              </button>
+            </div>
           </div>
         )}
 
