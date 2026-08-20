@@ -2,9 +2,11 @@ export const dynamic = "force-dynamic";
 
 import { getLavoro, statoLabel, giorniRimanentiRevisione, getRevisioniLavoro } from "@/lib/data";
 import { calcolaCommissione } from "@/lib/calc";
+import { getUtenteCorrente } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import PannelloCandidature from "@/components/PannelloCandidature";
 import PannelloConsegna from "@/components/PannelloConsegna";
+import ChatLavoro from "@/components/ChatLavoro";
 
 export default async function DettaglioLavoro({
   params,
@@ -17,6 +19,7 @@ export default async function DettaglioLavoro({
 
   const split = calcolaCommissione(lavoro.budget);
   const revisioni = await getRevisioniLavoro(id);
+  const utente = await getUtenteCorrente();
 
   return (
     <main className="max-w-3xl mx-auto px-6 py-16">
@@ -116,6 +119,10 @@ export default async function DettaglioLavoro({
           lavoro.dataConsegna ? giorniRimanentiRevisione(lavoro.dataConsegna) : 30
         }
       />
+
+      {utente && (utente.id === lavoro.aziendaUtenteId || utente.id === lavoro.disegnatoreUtenteId) && (
+        <ChatLavoro lavoroId={lavoro.id} stato={lavoro.stato} utenteCorrenteId={utente.id} />
+      )}
 
       {revisioni.length > 0 && (
         <div className="border border-[var(--blueprint-line)] p-6 mt-6">
