@@ -10,7 +10,6 @@ const mono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
 });
-
 const body = Inter({
   variable: "--font-body",
   subsets: ["latin"],
@@ -47,8 +46,11 @@ export default function RootLayout({
         </header>
         {children}
         <footer className="border-t border-[var(--blueprint-line)] mt-24">
-          <div className="max-w-5xl mx-auto px-6 py-6 text-xs font-mono-cad text-[var(--blueprint-text-dim)] flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between">
+          <div className="max-w-5xl mx-auto px-6 py-6 text-xs font-mono-cad text-[var(--blueprint-text-dim)] flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 sm:justify-between">
             <span>VERIFICAD — SCALA 1:1 — REV. MVP</span>
+            <Link href="/termini" className="hover:text-[var(--blueprint-accent-strong)] transition-colors">
+              Termini di Servizio
+            </Link>
             <span>commissione 10% + 10% · pagamento protetto</span>
           </div>
         </footer>
