@@ -6,6 +6,7 @@ import {
   registraTrasferimentoLavoro,
   salvaStripeAccountId,
   segnaContestazioneRisolta,
+  impostaOnboardingCompletato,
 } from "./data";
 import { calcolaImportiLavoro, RegimeFiscale } from "./fiscale";
 import { supabase } from "./supabase";
@@ -122,6 +123,30 @@ export async function creaOnboardingDisegnatore(input: {
     return { url: link.url };
   } catch (err) {
     console.error("Errore onboarding Stripe:", err);
+    const messaggio = err instanceof Error ? err.message : "Errore sconosciuto.";
+    return { errore: `Errore Stripe: ${messaggio}` };
+  }
+}
+
+// Controlla direttamente su Stripe (non aspetta il webhook) se il conto del
+// disegnatore ha completato l'onboarding, e aggiorna il profilo di
+// conseguenza. Utile come verifica manuale immediata, indipendente dai
+// tempi/dalla configurazione dei webhook.
+export async function verificaStatoOnboarding(
+  utenteId: string
+): Promise<{ stripeOnboardingCompletato: boolean } | { errore: string }> {
+  try {
+    const stripe = getStripe();
+    const profilo = await getProfilo(utenteId);
+    if (!profilo.stripeAccountId) {
+      return { errore: "Nessun conto Stripe collegato a questo profilo." };
+    }
+    const account = await stripe.accounts.retrieve(profilo.stripeAccountId);
+    const completato = Boolean(account.details_submitted && account.charges_enabled);
+    await impostaOnboardingCompletato(utenteId, completato);
+    return { stripeOnboardingCompletato: completato };
+  } catch (err) {
+    console.error("Errore verifica stato Stripe:", err);
     const messaggio = err instanceof Error ? err.message : "Errore sconosciuto.";
     return { errore: `Errore Stripe: ${messaggio}` };
   }

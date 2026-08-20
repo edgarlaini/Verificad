@@ -47,6 +47,7 @@ function ProfiloContent() {
   const [percentualeRitenuta, setPercentualeRitenuta] = useState(20);
   const [stripeOnboardingCompletato, setStripeOnboardingCompletato] = useState(false);
   const [collegandoStripe, setCollegandoStripe] = useState(false);
+  const [verificandoStripe, setVerificandoStripe] = useState(false);
   const [caricamento, setCaricamento] = useState(true);
   const [salvataggio, setSalvataggio] = useState(false);
   const [uploadCv, setUploadCv] = useState(false);
@@ -97,6 +98,25 @@ function ProfiloContent() {
       return;
     }
     if (data.url) window.location.href = data.url;
+  }
+
+  async function verificaStripe() {
+    setVerificandoStripe(true);
+    setErrore("");
+    setMessaggio("");
+    const res = await fetch("/api/profilo/stripe-status", { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    setVerificandoStripe(false);
+    if (!res.ok) {
+      setErrore(data.error || "Errore nella verifica dello stato Stripe.");
+      return;
+    }
+    setStripeOnboardingCompletato(data.stripeOnboardingCompletato);
+    setMessaggio(
+      data.stripeOnboardingCompletato
+        ? "Stripe risulta collegato e pronto."
+        : "Stripe non risulta ancora pronto — l'onboarding potrebbe non essere completo."
+    );
   }
 
   function toggleProgramma(programma: string) {
@@ -316,18 +336,28 @@ function ProfiloContent() {
               >
                 {stripeOnboardingCompletato ? "✓ Stripe collegato" : "Stripe non ancora collegato"}
               </span>
-              <button
-                type="button"
-                onClick={collegaStripe}
-                disabled={collegandoStripe}
-                className="shrink-0 font-mono-cad text-xs border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40"
-              >
-                {collegandoStripe
-                  ? "reindirizzamento..."
-                  : stripeOnboardingCompletato
-                  ? "aggiorna dati Stripe"
-                  : "collega Stripe →"}
-              </button>
+              <div className="flex gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={verificaStripe}
+                  disabled={verificandoStripe}
+                  className="font-mono-cad text-xs border border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)] px-3 py-1.5 hover:border-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)] transition-colors disabled:opacity-40"
+                >
+                  {verificandoStripe ? "verifica..." : "verifica stato"}
+                </button>
+                <button
+                  type="button"
+                  onClick={collegaStripe}
+                  disabled={collegandoStripe}
+                  className="font-mono-cad text-xs border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40"
+                >
+                  {collegandoStripe
+                    ? "reindirizzamento..."
+                    : stripeOnboardingCompletato
+                    ? "aggiorna dati Stripe"
+                    : "collega Stripe →"}
+                </button>
+              </div>
             </div>
           </div>
         )}
