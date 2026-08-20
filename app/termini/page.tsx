@@ -1,0 +1,154 @@
+export const dynamic = "force-static";
+
+export default function TerminiPage() {
+  return (
+    <main className="max-w-3xl mx-auto px-6 py-16">
+      <p className="font-mono-cad text-xs tracking-[0.3em] text-[var(--blueprint-accent)] mb-4">
+        TAV. 08 — TERMINI DI SERVIZIO
+      </p>
+      <h1 className="text-2xl font-semibold mb-2">Termini di Servizio</h1>
+      <p className="text-[var(--blueprint-text-dim)] text-sm mb-10">
+        Ultimo aggiornamento: 20 agosto 2026 — LAINI STUDIO 3D di Edgar Laini, titolare della piattaforma VerifiCAD.
+      </p>
+
+      <div className="space-y-8 text-sm leading-relaxed text-[var(--blueprint-text-dim)]">
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            1. OGGETTO E ACCETTAZIONE
+          </h2>
+          <p>
+            VerifiCAD è una piattaforma online gestita da LAINI STUDIO 3D di Edgar Laini che mette in contatto
+            aziende in cerca di modellazione CAD ("Azienda") con disegnatori tecnici freelance ("Disegnatore").
+            Registrandosi e utilizzando il sito, Azienda e Disegnatore accettano integralmente i presenti Termini.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            2. RUOLO DELLA PIATTAFORMA
+          </h2>
+          <p>
+            VerifiCAD agisce esclusivamente come intermediario tecnico e di pagamento tra Azienda e Disegnatore.
+            Il contratto d&apos;opera per l&apos;esecuzione del singolo lavoro CAD si perfeziona direttamente tra
+            Azienda e Disegnatore; VerifiCAD non è parte di tale contratto e non risponde della qualità, dei tempi
+            o della conformità del lavoro consegnato, fermi restando gli strumenti di verifica e revisione messi a
+            disposizione dalla piattaforma.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            3. PAGAMENTI
+          </h2>
+          <p>
+            Il Disegnatore fattura direttamente all&apos;Azienda il valore del lavoro svolto, secondo il proprio
+            regime fiscale. VerifiCAD fattura separatamente ad Azienda e Disegnatore le proprie commissioni di
+            intermediazione. Tutti gli importi dovuti — compenso del Disegnatore e commissioni di VerifiCAD —
+            transitano obbligatoriamente attraverso gli strumenti di pagamento della piattaforma, che li trattiene
+            a garanzia (escrow) fino all&apos;approvazione della consegna o al rilascio automatico trascorsi 30
+            giorni dalla consegna, secondo quanto indicato nella pagina di ciascun lavoro.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            4. REVISIONI
+          </h2>
+          <p>
+            Ogni lavoro include fino a 3 revisioni di tipo "modifica di progetto" senza costi aggiuntivi. Oltre
+            tale soglia, ogni ulteriore blocco di 3 revisioni è soggetto a un supplemento pari al 20% del valore
+            del lavoro, con la stessa ripartizione di commissione applicata al lavoro originale. Le richieste di
+            correzione di un errore rispetto al disegno tecnico fornito non sono conteggiate come revisioni.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            5. UTILIZZO ESCLUSIVO DELLA PIATTAFORMA
+          </h2>
+          <p>
+            Azienda e Disegnatore si impegnano a condurre attraverso VerifiCAD ogni comunicazione, pagamento e
+            gestione relativi ai lavori originati sulla piattaforma. È vietato concordare, proporre o accettare
+            pagamenti al di fuori degli strumenti messi a disposizione da VerifiCAD per lavori nati sulla
+            piattaforma.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            6. CLAUSOLA DI NON DISINTERMEDIAZIONE
+          </h2>
+          <p>
+            Per un periodo di 24 (ventiquattro) mesi decorrenti dal primo contatto avvenuto tramite VerifiCAD tra
+            una specifica Azienda e un specifico Disegnatore (candidatura, messaggio o assegnazione di un lavoro),
+            le parti si impegnano reciprocamente a non instaurare, direttamente o indirettamente, rapporti di
+            lavoro, collaborazione o fornitura di servizi di modellazione CAD al di fuori della piattaforma VerifiCAD,
+            salvo espressa autorizzazione scritta di LAINI STUDIO 3D.
+          </p>
+          <p className="mt-3">
+            In caso di violazione della presente clausola, la parte inadempiente sarà tenuta a corrispondere a
+            LAINI STUDIO 3D, a titolo di penale ai sensi dell&apos;art. 1382 c.c., una somma pari al 20% (venti
+            per cento) del valore complessivo dei lavori svolti al di fuori della piattaforma in violazione del
+            presente articolo, fatto salvo il diritto di LAINI STUDIO 3D al risarcimento dell&apos;eventuale
+            maggior danno.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            7. PROPRIETÀ DEI FILE E DEI MODELLI
+          </h2>
+          <p>
+            Salvo diverso accordo tra le parti, i diritti sul modello 3D consegnato si trasferiscono all&apos;Azienda
+            al momento dell&apos;approvazione del lavoro o del rilascio automatico del pagamento. I disegni tecnici
+            forniti dall&apos;Azienda restano di sua proprietà e sono condivisi con il Disegnatore al solo scopo di
+            eseguire il lavoro assegnato.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            8. LIMITAZIONE DI RESPONSABILITÀ
+          </h2>
+          <p>
+            VerifiCAD non garantisce la disponibilità continuativa del servizio e non risponde di danni derivanti
+            da malfunzionamenti, interruzioni o ritardi nei pagamenti dovuti a terze parti (istituti di pagamento,
+            servizi di hosting). La responsabilità di VerifiCAD, ove sussistente, è in ogni caso limitata
+            all&apos;importo delle commissioni percepite sul singolo lavoro contestato.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            9. RECESSO E SOSPENSIONE DELL&apos;ACCOUNT
+          </h2>
+          <p>
+            Ciascuna parte può chiudere il proprio account in qualsiasi momento. LAINI STUDIO 3D si riserva il
+            diritto di sospendere o chiudere un account in caso di violazione dei presenti Termini, ferme restando
+            le obbligazioni già maturate (lavori in corso, pagamenti in escrow, clausola di cui all&apos;art. 6).
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            10. LEGGE APPLICABILE E FORO COMPETENTE
+          </h2>
+          <p>
+            I presenti Termini sono regolati dalla legge italiana. Per ogni controversia è competente in via
+            esclusiva il Foro di Lecco, salvo diversa inderogabile previsione di legge a tutela del consumatore.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-accent-strong)] mb-3">
+            11. CONTATTI
+          </h2>
+          <p>
+            Per qualsiasi domanda sui presenti Termini: edgar.laini@gmail.com — LAINI STUDIO 3D di Edgar Laini,
+            Via Principale n°29, 23879 Verderio (LC), P.IVA 02938570138.
+          </p>
+        </section>
+      </div>
+    </main>
+  );
+}
