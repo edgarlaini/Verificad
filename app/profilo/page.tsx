@@ -14,6 +14,22 @@ const PROGRAMMI_CAD_DISPONIBILI = [
   "Allplan",
 ];
 
+type StatoLavoro = "aperto" | "in_corso" | "in_revisione" | "chiuso";
+
+const STATO_LABEL: Record<StatoLavoro, string> = {
+  aperto: "Aperto",
+  in_corso: "In corso",
+  in_revisione: "In revisione",
+  chiuso: "Chiuso",
+};
+
+const STATO_COLORE: Record<StatoLavoro, string> = {
+  aperto: "text-[var(--blueprint-accent-strong)] border-[var(--blueprint-accent)]",
+  in_corso: "text-blue-300 border-blue-400/50",
+  in_revisione: "text-amber-300 border-amber-400/50",
+  chiuso: "text-[var(--blueprint-text-dim)] border-[var(--blueprint-line)]",
+};
+
 interface Utente {
   id: string;
   email: string;
@@ -31,6 +47,114 @@ interface Profilo {
   aliquotaIva: number;
   percentualeRitenuta: number;
   stripeOnboardingCompletato: boolean;
+}
+
+interface LavoroAzienda {
+  id: string;
+  titolo: string;
+  descrizione: string;
+  budget: number;
+  scadenza: string;
+  stato: StatoLavoro;
+  disegnatoreAssegnato?: string | null;
+  disegnoNome?: string | null;
+}
+
+function LavoriAziendaSection({ utente }: { utente: Utente }) {
+  const [lavori, setLavori] = useState<LavoroAzienda[] | null>(null);
+
+  useEffect(() => {
+    fetch("/api/lavori/miei")
+      .then((r) => r.json())
+      .then((data) => setLavori(Array.isArray(data) ? data : []));
+  }, []);
+
+  if (lavori === null) {
+    return (
+      <p className="font-mono-cad text-sm text-[var(--blueprint-text-dim)]">
+        Caricamento lavori...
+      </p>
+    );
+  }
+
+  const attivi = lavori.filter((l) => l.stato !== "chiuso");
+  const conclusi = lavori.filter((l) => l.stato === "chiuso");
+
+  function Card({ lavoro }: { lavoro: LavoroAzienda }) {
+    return (
+      <Link
+        href={`/lavori/${lavoro.id}`}
+        className="block border border-[var(--blueprint-line)] p-4 hover:border-[var(--blueprint-accent)] transition-colors"
+      >
+        <div className="flex items-center justify-between gap-4 mb-2">
+          <span
+            className={`font-mono-cad text-[10px] tracking-widest border px-2 py-0.5 ${STATO_COLORE[lavoro.stato]}`}
+          >
+            {STATO_LABEL[lavoro.stato].toUpperCase()}
+          </span>
+          <span className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)]">
+            €{lavoro.budget}
+          </span>
+        </div>
+        <h3 className="font-semibold mb-1">{lavoro.titolo}</h3>
+        <p className="text-sm text-[var(--blueprint-text-dim)] line-clamp-2 mb-2">
+          {lavoro.descrizione}
+        </p>
+        <div className="flex items-center justify-between gap-4 text-xs font-mono-cad text-[var(--blueprint-text-dim)]">
+          <span>
+            {lavoro.disegnatoreAssegnato
+              ? `disegnatore: ${lavoro.disegnatoreAssegnato}`
+              : "nessun disegnatore assegnato"}
+          </span>
+          <span>scad. {lavoro.scadenza}</span>
+        </div>
+      </Link>
+    );
+  }
+
+  return (
+    <div className="space-y-10">
+      <div>
+        <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-3">
+          LAVORI ATTIVI ({attivi.length})
+        </label>
+        {attivi.length === 0 ? (
+          <p className="text-sm text-[var(--blueprint-text-dim)]">
+            Nessun lavoro attivo al momento.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {attivi.map((l) => (
+              <Card key={l.id} lavoro={l} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div>
+        <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-3">
+          LAVORI CONCLUSI ({conclusi.length})
+        </label>
+        {conclusi.length === 0 ? (
+          <p className="text-sm text-[var(--blueprint-text-dim)]">
+            Nessun lavoro concluso ancora.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {conclusi.map((l) => (
+              <Card key={l.id} lavoro={l} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <p className="text-xs font-mono-cad text-[var(--blueprint-text-dim)] text-center">
+        <Link href="/pubblica-lavoro" className="hover:text-[var(--blueprint-accent-strong)]">
+          + pubblica un nuovo lavoro →
+        </Link>
+      </p>
+    </div>
+  );
 }
 
 function ProfiloContent() {
@@ -63,6 +187,7 @@ function ProfiloContent() {
           router.push("/accedi");
           return;
         }
+        if (d.utente.ruolo === "azienda") return;
         return fetch("/api/profilo")
           .then((r) => r.json())
           .then((data) => {
@@ -188,6 +313,21 @@ function ProfiloContent() {
 
   if (!utente) return null;
 
+  if (utente.ruolo === "azienda") {
+    return (
+      <main className="max-w-2xl mx-auto px-6 py-16">
+        <p className="font-mono-cad text-xs tracking-[0.3em] text-[var(--blueprint-accent)] mb-4">
+          TAV. 07 — I MIEI LAVORI
+        </p>
+        <h1 className="text-2xl font-semibold mb-1">I miei lavori</h1>
+        <p className="text-[var(--blueprint-text-dim)] text-sm mb-8">
+          I lavori che hai pubblicato su VerifiCAD, attivi e conclusi.
+        </p>
+        <LavoriAziendaSection utente={utente} />
+      </main>
+    );
+  }
+
   return (
     <main className="max-w-2xl mx-auto px-6 py-16">
       <p className="font-mono-cad text-xs tracking-[0.3em] text-[var(--blueprint-accent)] mb-4">
@@ -195,9 +335,7 @@ function ProfiloContent() {
       </p>
       <h1 className="text-2xl font-semibold mb-1">Il mio profilo</h1>
       <p className="text-[var(--blueprint-text-dim)] text-sm mb-8">
-        {utente.ruolo === "disegnatore"
-          ? "Queste informazioni sono quello che le aziende vedono quando valutano il tuo profilo."
-          : "Competenze e CV sono pensati per i profili disegnatore, ma puoi comunque tenerli aggiornati."}
+        Queste informazioni sono quello che le aziende vedono quando valutano il tuo profilo.
       </p>
 
       <div className="space-y-8">
@@ -240,127 +378,123 @@ function ProfiloContent() {
           </div>
         </div>
 
-        {utente.ruolo === "disegnatore" && (
-          <div>
-            <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-2">
-              REGIME FISCALE
-            </label>
-            <p className="text-xs text-[var(--blueprint-text-dim)] mb-3">
-              Serve per calcolare l&apos;importo esatto che l&apos;azienda deve versare quando ti viene assegnato un lavoro — fatturi tu direttamente all&apos;azienda, secondo il tuo regime.
-            </p>
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              {(["forfettario", "ordinario"] as const).map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => setRegimeFiscale(r)}
-                  className={`font-mono-cad text-sm py-2 px-3 border transition-colors ${
-                    regimeFiscale === r
-                      ? "border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] bg-[var(--blueprint-bg-2)]"
-                      : "border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)]"
-                  }`}
-                >
-                  {regimeFiscale === r ? "✓ " : ""}
-                  {r === "forfettario" ? "Forfettario" : "Ordinario"}
-                </button>
-              ))}
-            </div>
-
-            {regimeFiscale === "ordinario" && (
-              <div className="grid grid-cols-3 gap-3 border border-[var(--blueprint-line)] p-4">
-                <div>
-                  <label className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] block mb-1">
-                    RIVALSA CASSA %
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    step={0.5}
-                    value={percentualeRivalsa}
-                    onChange={(e) => setPercentualeRivalsa(parseFloat(e.target.value) || 0)}
-                    className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-2 py-1.5 text-sm font-mono-cad focus:outline-none focus:border-[var(--blueprint-accent)]"
-                  />
-                </div>
-                <div>
-                  <label className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] block mb-1">
-                    IVA %
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    step={0.5}
-                    value={aliquotaIva}
-                    onChange={(e) => setAliquotaIva(parseFloat(e.target.value) || 0)}
-                    className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-2 py-1.5 text-sm font-mono-cad focus:outline-none focus:border-[var(--blueprint-accent)]"
-                  />
-                </div>
-                <div>
-                  <label className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] block mb-1">
-                    RITENUTA %
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    step={0.5}
-                    value={percentualeRitenuta}
-                    onChange={(e) => setPercentualeRitenuta(parseFloat(e.target.value) || 0)}
-                    className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-2 py-1.5 text-sm font-mono-cad focus:outline-none focus:border-[var(--blueprint-accent)]"
-                  />
-                </div>
-                <p className="col-span-3 text-[11px] text-[var(--blueprint-text-dim)] mt-1">
-                  Valori standard per un professionista con Gestione Separata INPS: 4% / 22% / 20%. Se hai una cassa diversa (es. Inarcassa), modifica pure.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {utente.ruolo === "disegnatore" && (
-          <div>
-            <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-2">
-              PAGAMENTI
-            </label>
-            <p className="text-xs text-[var(--blueprint-text-dim)] mb-3">
-              Collega il tuo conto Stripe per poter ricevere i pagamenti dei lavori assegnati. Senza questo passaggio, le aziende non potranno pagarti tramite la piattaforma.
-            </p>
-            <div className="border border-[var(--blueprint-line)] p-4 flex items-center justify-between gap-4">
-              <span
-                className={`font-mono-cad text-xs ${
-                  stripeOnboardingCompletato
-                    ? "text-[var(--blueprint-accent-strong)]"
-                    : "text-[var(--blueprint-text-dim)]"
+        <div>
+          <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-2">
+            REGIME FISCALE
+          </label>
+          <p className="text-xs text-[var(--blueprint-text-dim)] mb-3">
+            Serve per calcolare l&apos;importo esatto che l&apos;azienda deve versare quando ti viene assegnato un lavoro — fatturi tu direttamente all&apos;azienda, secondo il tuo regime.
+          </p>
+          <div className="grid grid-cols-2 gap-2 mb-4">
+            {(["forfettario", "ordinario"] as const).map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setRegimeFiscale(r)}
+                className={`font-mono-cad text-sm py-2 px-3 border transition-colors ${
+                  regimeFiscale === r
+                    ? "border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] bg-[var(--blueprint-bg-2)]"
+                    : "border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)]"
                 }`}
               >
-                {stripeOnboardingCompletato ? "✓ Stripe collegato" : "Stripe non ancora collegato"}
-              </span>
-              <div className="flex gap-2 shrink-0">
-                <button
-                  type="button"
-                  onClick={verificaStripe}
-                  disabled={verificandoStripe}
-                  className="font-mono-cad text-xs border border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)] px-3 py-1.5 hover:border-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)] transition-colors disabled:opacity-40"
-                >
-                  {verificandoStripe ? "verifica..." : "verifica stato"}
-                </button>
-                <button
-                  type="button"
-                  onClick={collegaStripe}
-                  disabled={collegandoStripe}
-                  className="font-mono-cad text-xs border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40"
-                >
-                  {collegandoStripe
-                    ? "reindirizzamento..."
-                    : stripeOnboardingCompletato
-                    ? "aggiorna dati Stripe"
-                    : "collega Stripe →"}
-                </button>
+                {regimeFiscale === r ? "✓ " : ""}
+                {r === "forfettario" ? "Forfettario" : "Ordinario"}
+              </button>
+            ))}
+          </div>
+
+          {regimeFiscale === "ordinario" && (
+            <div className="grid grid-cols-3 gap-3 border border-[var(--blueprint-line)] p-4">
+              <div>
+                <label className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] block mb-1">
+                  RIVALSA CASSA %
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.5}
+                  value={percentualeRivalsa}
+                  onChange={(e) => setPercentualeRivalsa(parseFloat(e.target.value) || 0)}
+                  className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-2 py-1.5 text-sm font-mono-cad focus:outline-none focus:border-[var(--blueprint-accent)]"
+                />
               </div>
+              <div>
+                <label className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] block mb-1">
+                  IVA %
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.5}
+                  value={aliquotaIva}
+                  onChange={(e) => setAliquotaIva(parseFloat(e.target.value) || 0)}
+                  className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-2 py-1.5 text-sm font-mono-cad focus:outline-none focus:border-[var(--blueprint-accent)]"
+                />
+              </div>
+              <div>
+                <label className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] block mb-1">
+                  RITENUTA %
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.5}
+                  value={percentualeRitenuta}
+                  onChange={(e) => setPercentualeRitenuta(parseFloat(e.target.value) || 0)}
+                  className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-2 py-1.5 text-sm font-mono-cad focus:outline-none focus:border-[var(--blueprint-accent)]"
+                />
+              </div>
+              <p className="col-span-3 text-[11px] text-[var(--blueprint-text-dim)] mt-1">
+                Valori standard per un professionista con Gestione Separata INPS: 4% / 22% / 20%. Se hai una cassa diversa (es. Inarcassa), modifica pure.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-2">
+            PAGAMENTI
+          </label>
+          <p className="text-xs text-[var(--blueprint-text-dim)] mb-3">
+            Collega il tuo conto Stripe per poter ricevere i pagamenti dei lavori assegnati. Senza questo passaggio, le aziende non potranno pagarti tramite la piattaforma.
+          </p>
+          <div className="border border-[var(--blueprint-line)] p-4 flex items-center justify-between gap-4">
+            <span
+              className={`font-mono-cad text-xs ${
+                stripeOnboardingCompletato
+                  ? "text-[var(--blueprint-accent-strong)]"
+                  : "text-[var(--blueprint-text-dim)]"
+              }`}
+            >
+              {stripeOnboardingCompletato ? "✓ Stripe collegato" : "Stripe non ancora collegato"}
+            </span>
+            <div className="flex gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={verificaStripe}
+                disabled={verificandoStripe}
+                className="font-mono-cad text-xs border border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)] px-3 py-1.5 hover:border-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)] transition-colors disabled:opacity-40"
+              >
+                {verificandoStripe ? "verifica..." : "verifica stato"}
+              </button>
+              <button
+                type="button"
+                onClick={collegaStripe}
+                disabled={collegandoStripe}
+                className="font-mono-cad text-xs border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40"
+              >
+                {collegandoStripe
+                  ? "reindirizzamento..."
+                  : stripeOnboardingCompletato
+                  ? "aggiorna dati Stripe"
+                  : "collega Stripe →"}
+              </button>
             </div>
           </div>
-        )}
+        </div>
 
         <div>
           <label className="font-mono-cad text-xs tracking-widest text-[var(--blueprint-text-dim)] block mb-2">

@@ -115,6 +115,18 @@ export async function getLavori(): Promise<Lavoro[]> {
   return Promise.all((data as Lavoro[]).map(applicaApprovazioneAutomatica));
 }
 
+// Lavori pubblicati da una specifica azienda (usata dalla sua pagina "i miei
+// lavori" — non la bacheca generale, che mostra i lavori di tutte le aziende).
+export async function getLavoriByAzienda(aziendaUtenteId: string): Promise<Lavoro[]> {
+  const { data, error } = await supabase
+    .from("lavori")
+    .select("*")
+    .eq("aziendaUtenteId", aziendaUtenteId)
+    .order("creatoIl", { ascending: false });
+  if (error || !data) return [];
+  return Promise.all((data as Lavoro[]).map(applicaApprovazioneAutomatica));
+}
+
 export async function getLavoro(id: string): Promise<Lavoro | undefined> {
   const { data, error } = await supabase.from("lavori").select("*").eq("id", id).single();
   if (error || !data) return undefined;
