@@ -12,6 +12,8 @@ const PROGRAMMI_CAD_DISPONIBILI = [
   "Inventor",
   "SketchUp",
   "Allplan",
+  "Archicad",
+  "Fusion",
 ];
 
 type StatoLavoro = "aperto" | "in_corso" | "in_revisione" | "chiuso";

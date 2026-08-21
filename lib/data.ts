@@ -56,6 +56,8 @@ export const PROGRAMMI_CAD_DISPONIBILI = [
   "Inventor",
   "SketchUp",
   "Allplan",
+  "Archicad",
+  "Fusion",
 ];
 
 export interface Candidatura {
