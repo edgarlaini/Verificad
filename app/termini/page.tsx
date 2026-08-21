@@ -8,7 +8,7 @@ export default function TerminiPage() {
       </p>
       <h1 className="text-2xl font-semibold mb-2">Termini di Servizio</h1>
       <p className="text-[var(--blueprint-text-dim)] text-sm mb-10">
-        Ultimo aggiornamento: 21 agosto 2026 (rev. 3 — precisazione art. 3, commissioni di elaborazione pagamenti) — LAINI STUDIO 3D di Edgar Laini, titolare della piattaforma VerifiCAD.
+        Ultimo aggiornamento: 21 agosto 2026 (rev. 4 — art. 3 commissioni di elaborazione pagamenti, art. 12 recapiti) — LAINI STUDIO 3D di Edgar Laini, titolare della piattaforma VerifiCAD.
       </p>
 
       <div className="space-y-8 text-sm leading-relaxed text-[var(--blueprint-text-dim)]">
@@ -170,8 +170,8 @@ export default function TerminiPage() {
             12. CONTATTI
           </h2>
           <p>
-            Per qualsiasi domanda sui presenti Termini: edgar.laini@gmail.com — LAINI STUDIO 3D di Edgar Laini,
-            Via Principale n°29, 23879 Verderio (LC), P.IVA 02938570138.
+            Per qualsiasi domanda sui presenti Termini: edgar.laini@gmail.com — tel. +39 349 635 9743 —
+            LAINI STUDIO 3D di Edgar Laini, P.IVA 02938570138.
           </p>
         </section>
       </div>
