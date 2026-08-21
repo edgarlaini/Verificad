@@ -18,30 +18,30 @@ export default function ComeFunziona() {
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
             <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">01 — Pubblica il lavoro</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
-              Descrivi il progetto e allega il disegno tecnico (DWG, PDF). È obbligatorio: sarà il
-              riferimento oggettivo su cui verrà confrontato il modello consegnato.
+              Descrivi il progetto, indica il budget a disposizione e allega il disegno tecnico
+              (DWG, PDF) obbligatorio: sarà il riferimento oggettivo su cui verrà confrontato il
+              modello consegnato.
             </p>
           </li>
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
             <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">02 — Ricevi le candidature</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
-              I disegnatori CAD si propongono con un breve messaggio. Scegli chi assegnare al lavoro.
+              I disegnatori CAD si propongono con un messaggio. Scegli ed effettui il pagamento
+              sulla piattaforma, bloccato fino all&apos;approvazione finale.
             </p>
           </li>
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
             <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">03 — Verifica e scarica</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
-              Quando il lavoro è consegnato, il file è già scaricabile: il pagamento è bloccato in
-              escrow dal momento in cui hai scelto il disegnatore, quindi non devi aspettare per
-              controllarlo. Se qualcosa non torna, richiedi una revisione indicando quale dettaglio
-              non è conforme al disegno — sono incluse 3 revisioni gratuite.
+              Il file è scaricabile alla consegna. Se qualcosa non è conforme, richiedi una
+              revisione — sono incluse 3 revisioni gratuite.
             </p>
           </li>
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
             <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">04 — Approva e libera il pagamento</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
-              La tua approvazione rilascia il pagamento al disegnatore. Se non rispondi entro 30
-              giorni, l&apos;approvazione scatta automaticamente.
+              L&apos;approvazione rilascia il pagamento. Rilascio automatico dopo 30 giorni se non
+              rispondi.
             </p>
           </li>
         </ol>
@@ -53,7 +53,7 @@ export default function ComeFunziona() {
         </h2>
         <ol className="space-y-6">
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
-            <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">01 — Il pagamento è già garantito</p>
+            <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">01 — Il pagamento è garantito</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
               Quando ti candidi e vieni scelto, l&apos;azienda ha già versato l&apos;importo sulla
               piattaforma. Non lavori mai a rischio di non essere pagato.
@@ -62,15 +62,16 @@ export default function ComeFunziona() {
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
             <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">02 — Consegni il lavoro</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
-              Carichi il file finale, conforme al disegno tecnico ricevuto. L&apos;azienda può
-              scaricarlo subito: il pagamento è già bloccato dal momento in cui ti ha scelto.
+              Carichi il file conforme al disegno tecnico ricevuto. L&apos;azienda può scaricarlo
+              subito e darti conferma, oppure richiedere fino a 3 revisioni comprese nel budget
+              iniziale.
             </p>
           </li>
           <li className="border-l-2 border-[var(--blueprint-line)] pl-5">
             <p className="font-mono-cad text-sm text-[var(--blueprint-accent-strong)] mb-1">03 — Vieni pagato</p>
             <p className="text-sm text-[var(--blueprint-text-dim)]">
-              Approvazione dell&apos;azienda, o rilascio automatico dopo 30 giorni se non risponde.
-              In entrambi i casi, il pagamento arriva.
+              Approvazione finale dell&apos;azienda, o conferma automatica dopo 30 giorni se
+              nessuno risponde. In entrambi i casi, vieni pagato.
             </p>
           </li>
         </ol>
