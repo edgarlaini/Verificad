@@ -8,7 +8,7 @@ export default function TerminiPage() {
       </p>
       <h1 className="text-2xl font-semibold mb-2">Termini di Servizio</h1>
       <p className="text-[var(--blueprint-text-dim)] text-sm mb-10">
-        Ultimo aggiornamento: 20 agosto 2026 (rev. 2 — aggiunto art. 5, controversie e rimborsi) — LAINI STUDIO 3D di Edgar Laini, titolare della piattaforma VerifiCAD.
+        Ultimo aggiornamento: 21 agosto 2026 (rev. 3 — precisazione art. 3, commissioni di elaborazione pagamenti) — LAINI STUDIO 3D di Edgar Laini, titolare della piattaforma VerifiCAD.
       </p>
 
       <div className="space-y-8 text-sm leading-relaxed text-[var(--blueprint-text-dim)]">
@@ -47,6 +47,11 @@ export default function TerminiPage() {
             transitano obbligatoriamente attraverso gli strumenti di pagamento della piattaforma, che li trattiene
             a garanzia (escrow) fino all&apos;approvazione della consegna o al rilascio automatico trascorsi 30
             giorni dalla consegna, secondo quanto indicato nella pagina di ciascun lavoro.
+          </p>
+          <p className="mt-3">
+            Le commissioni applicate dal fornitore terzo di servizi di pagamento per l&apos;elaborazione delle
+            transazioni sono interamente a carico di VerifiCAD e non vengono in alcun modo addebitate
+            all&apos;Azienda o al Disegnatore, oltre alle commissioni di intermediazione di cui sopra.
           </p>
         </section>
 

@@ -85,7 +85,9 @@ export default function ComeFunziona() {
           <p className="text-sm text-[var(--blueprint-text-dim)]">
             10% a carico dell&apos;azienda + 10% a carico del disegnatore, calcolati sul valore del
             lavoro. Nessun costo di iscrizione: si paga solo quando un lavoro viene chiuso con
-            successo. Ogni lavoro include 3 revisioni gratuite.
+            successo. Ogni lavoro include 3 revisioni gratuite. Le commissioni di elaborazione dei
+            pagamenti sono interamente a carico di VerifiCAD — nessun costo nascosto oltre a
+            quanto indicato sopra.
           </p>
         </div>
       </section>
