@@ -25,14 +25,12 @@ export default async function Home() {
           Competenze verificate, consegne conformi alle richieste, pagamento sempre protetto.
         </p>
       </section>
-
       <section className="py-10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-mono-cad text-sm tracking-widest text-[var(--blueprint-text-dim)]">
             LAVORI ATTIVI ({lavori.length})
           </h2>
         </div>
-
         <div className="grid gap-4">
           {lavori.map((lavoro) => (
             <Link
@@ -41,7 +39,7 @@ export default async function Home() {
               className="group border border-[var(--blueprint-line)] bg-[var(--blueprint-bg-2)]/60 hover:border-[var(--blueprint-accent)] transition-colors p-5"
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                <div>
+                <div className="min-w-0">
                   <div className="flex items-center gap-3 mb-1">
                     <span
                       className={`font-mono-cad text-[10px] tracking-widest border px-2 py-0.5 ${statoColor[lavoro.stato]}`}
@@ -58,8 +56,8 @@ export default async function Home() {
                   <p className="text-sm text-[var(--blueprint-text-dim)] mt-1 max-w-xl">
                     {lavoro.descrizione}
                   </p>
-                  <p className="font-mono-cad text-[11px] text-[var(--blueprint-accent)] mt-3">
-                    ⌗ {lavoro.disegnoAllegato}
+                  <p className="font-mono-cad text-[11px] text-[var(--blueprint-accent)] mt-3 break-all">
+                    ⌗ {lavoro.disegnoNome || lavoro.disegnoAllegato}
                   </p>
                 </div>
                 <div className="text-left sm:text-right shrink-0">
