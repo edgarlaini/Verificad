@@ -1,9 +1,7 @@
 import { Resend } from "resend";
 
-// Con un dominio non ancora verificato su Resend, il mittente deve restare
-// onboarding@resend.dev. Quando colleghi un dominio tuo (es. verificad.it)
-// su Resend, cambia questo indirizzo in qualcosa come noreply@verificad.it.
-const MITTENTE = "VerifiCAD <onboarding@resend.dev>";
+// Dominio verificad.com verificato su Resend (DKIM/MX/SPF) il 21/08/2026.
+const MITTENTE = "VerifiCAD <no-reply@verificad.com>";
 
 export async function inviaEmailVerifica(destinatario: string, nome: string, link: string) {
   try {
