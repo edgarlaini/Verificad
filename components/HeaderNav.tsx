@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
 interface Utente {
@@ -12,6 +12,7 @@ interface Utente {
 
 export default function HeaderNav() {
   const router = useRouter();
+  const pathname = usePathname();
   const [utente, setUtente] = useState<Utente | null | undefined>(undefined);
   const [menuAperto, setMenuAperto] = useState(false);
 
@@ -19,7 +20,11 @@ export default function HeaderNav() {
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d) => setUtente(d.utente));
-  }, []);
+    // Rilegge lo stato utente ad ogni cambio pagina: dopo un login o una
+    // registrazione, la pagina reindirizza con una navigazione client-side
+    // (senza ricaricare il sito), quindi senza questa dipendenza l'header
+    // resterebbe fermo allo stato letto al primo caricamento.
+  }, [pathname]);
 
   async function esci() {
     await fetch("/api/auth/esci", { method: "POST" });
