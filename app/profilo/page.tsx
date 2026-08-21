@@ -404,7 +404,7 @@ function ProfiloContent() {
           </div>
 
           {regimeFiscale === "ordinario" && (
-            <div className="grid grid-cols-3 gap-3 border border-[var(--blueprint-line)] p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border border-[var(--blueprint-line)] p-4">
               <div>
                 <label className="font-mono-cad text-[10px] text-[var(--blueprint-text-dim)] block mb-1">
                   RIVALSA CASSA %
@@ -447,7 +447,7 @@ function ProfiloContent() {
                   className="w-full bg-[var(--blueprint-bg-2)] border border-[var(--blueprint-line)] px-2 py-1.5 text-sm font-mono-cad focus:outline-none focus:border-[var(--blueprint-accent)]"
                 />
               </div>
-              <p className="col-span-3 text-[11px] text-[var(--blueprint-text-dim)] mt-1">
+              <p className="col-span-1 sm:col-span-3 text-[11px] text-[var(--blueprint-text-dim)] mt-1">
                 Valori standard per un professionista con Gestione Separata INPS: 4% / 22% / 20%. Se hai una cassa diversa (es. Inarcassa), modifica pure.
               </p>
             </div>
@@ -461,7 +461,7 @@ function ProfiloContent() {
           <p className="text-xs text-[var(--blueprint-text-dim)] mb-3">
             Collega il tuo conto Stripe per poter ricevere i pagamenti dei lavori assegnati. Senza questo passaggio, le aziende non potranno pagarti tramite la piattaforma.
           </p>
-          <div className="border border-[var(--blueprint-line)] p-4 flex items-center justify-between gap-4">
+          <div className="border border-[var(--blueprint-line)] p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <span
               className={`font-mono-cad text-xs ${
                 stripeOnboardingCompletato
@@ -471,12 +471,12 @@ function ProfiloContent() {
             >
               {stripeOnboardingCompletato ? "✓ Stripe collegato" : "Stripe non ancora collegato"}
             </span>
-            <div className="flex gap-2 shrink-0">
+            <div className="flex flex-col sm:flex-row gap-2 sm:ml-auto">
               <button
                 type="button"
                 onClick={verificaStripe}
                 disabled={verificandoStripe}
-                className="font-mono-cad text-xs border border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)] px-3 py-1.5 hover:border-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)] transition-colors disabled:opacity-40"
+                className="font-mono-cad text-xs border border-[var(--blueprint-line)] text-[var(--blueprint-text-dim)] px-3 py-1.5 hover:border-[var(--blueprint-accent)] hover:text-[var(--blueprint-accent-strong)] transition-colors disabled:opacity-40 whitespace-nowrap text-center"
               >
                 {verificandoStripe ? "verifica..." : "verifica stato"}
               </button>
@@ -484,7 +484,7 @@ function ProfiloContent() {
                 type="button"
                 onClick={collegaStripe}
                 disabled={collegandoStripe}
-                className="font-mono-cad text-xs border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40"
+                className="font-mono-cad text-xs border border-[var(--blueprint-accent)] text-[var(--blueprint-accent-strong)] px-3 py-1.5 hover:bg-[var(--blueprint-accent)] hover:text-[var(--blueprint-bg)] transition-colors disabled:opacity-40 whitespace-nowrap text-center"
               >
                 {collegandoStripe
                   ? "reindirizzamento..."
