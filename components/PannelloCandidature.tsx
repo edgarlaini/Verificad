@@ -9,6 +9,8 @@ interface Candidatura {
   disegnatoreNome: string;
   messaggio: string;
   stato: "in_attesa" | "accettata" | "rifiutata";
+  cvUrl?: string | null;
+  cvNome?: string | null;
 }
 
 interface Utente {
@@ -107,6 +109,16 @@ export default function PannelloCandidature({
                 <p className="text-sm text-[var(--blueprint-text-dim)] mt-1">
                   {c.messaggio}
                 </p>
+                {c.cvUrl && (
+                  <a
+                    href={c.cvUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-2 font-mono-cad text-xs text-[var(--blueprint-accent-strong)] hover:underline"
+                  >
+                    ⌗ {c.cvNome || "CV"} →
+                  </a>
+                )}
               </div>
               {c.stato === "in_attesa" && lavoroStato === "aperto" && (
                 <button
@@ -173,3 +185,4 @@ export default function PannelloCandidature({
     </div>
   );
 }
+
