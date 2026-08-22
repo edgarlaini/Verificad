@@ -68,6 +68,10 @@ export interface Candidatura {
   messaggio: string;
   stato: "in_attesa" | "accettata" | "rifiutata";
   creatoIl: string;
+  // CV visibile SOLO all'azienda proprietaria del lavoro, unicamente qui
+  // (nella lista delle candidature ricevute) — mai nel profilo pubblico.
+  cvUrl?: string | null;
+  cvNome?: string | null;
 }
 
 const GIORNI_APPROVAZIONE_AUTOMATICA = 30;
@@ -155,7 +159,6 @@ export interface DisegnatoreReale {
   nome: string;
   competenze: string;
   programmiCad: string[];
-  cvUrl: string | null;
   lavoriCompletati: number;
 }
 
@@ -168,8 +171,11 @@ export async function getDisegnatori(): Promise<DisegnatoreReale[]> {
 
   const ids = utenti.map((u) => u.id);
 
+  // Query pubblica: SOLO i campi mostrabili sulla pagina disegnatori.
+  // Il CV (cvUrl/cvNome) non viene mai recuperato qui — non deve essere
+  // visibile pubblicamente, viaggia solo tramite le candidature (vedi sotto).
   const [{ data: profili }, { data: lavoriChiusi }] = await Promise.all([
-    supabase.from("profili").select("*").in("utenteId", ids),
+    supabase.from("profili").select("utenteId, competenze, programmiCad").in("utenteId", ids),
     supabase.from("lavori").select("disegnatoreUtenteId").eq("stato", "chiuso").in("disegnatoreUtenteId", ids),
   ]);
 
@@ -187,7 +193,6 @@ export async function getDisegnatori(): Promise<DisegnatoreReale[]> {
       nome: u.nome,
       competenze: p?.competenze ?? "",
       programmiCad: p?.programmiCad ? (p.programmiCad as string).split(",").filter(Boolean) : [],
-      cvUrl: p?.cvUrl ?? null,
       lavoriCompletati: completatiPerUtente.get(u.id) ?? 0,
     };
   });
@@ -282,6 +287,9 @@ export async function creaCandidatura(input: {
   return id;
 }
 
+// Candidature ricevute per un lavoro: visibili solo all'azienda che ha
+// pubblicato quel lavoro. Qui, e solo qui, il CV del disegnatore viene
+// allegato (recuperato dal suo profilo al momento della lettura).
 export async function getCandidatureLavoro(lavoroId: string): Promise<Candidatura[]> {
   const { data, error } = await supabase
     .from("candidature")
@@ -289,7 +297,21 @@ export async function getCandidatureLavoro(lavoroId: string): Promise<Candidatur
     .eq("lavoroId", lavoroId)
     .order("creatoIl", { ascending: false });
   if (error || !data) return [];
-  return data as Candidatura[];
+
+  const candidature = data as Candidatura[];
+  const ids = candidature.map((c) => c.disegnatoreUtenteId);
+  if (ids.length === 0) return candidature;
+
+  const { data: profili } = await supabase
+    .from("profili")
+    .select("utenteId, cvUrl, cvNome")
+    .in("utenteId", ids);
+  const cvPerUtente = new Map((profili ?? []).map((p) => [p.utenteId, p]));
+
+  return candidature.map((c) => {
+    const p = cvPerUtente.get(c.disegnatoreUtenteId);
+    return { ...c, cvUrl: p?.cvUrl ?? null, cvNome: p?.cvNome ?? null };
+  });
 }
 
 export async function haGiaCandidato(
